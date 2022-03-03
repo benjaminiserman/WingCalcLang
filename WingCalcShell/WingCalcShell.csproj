@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WingCalculatorShared\WingCalculatorShared.csproj" />
+    <ProjectReference Include="..\WingCalc\WingCalc.csproj" />
   </ItemGroup>
 
 </Project>
