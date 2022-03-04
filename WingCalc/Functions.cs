@@ -1,8 +1,10 @@
 ﻿namespace WingCalculatorShared;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using WingCalculatorShared.Exceptions;
 using WingCalculatorShared.Nodes;
@@ -903,7 +905,7 @@ internal static class Functions
 		}, "Prints the symbols of each operator in WingCalc to standard output, then returns the number of operators in WingCalc."),
 		new("version", (args, scope) =>
 		{
-			scope.Solver.WriteLine($"{typeof(Solver).Assembly.GetName().Version}");
+			scope.Solver.WriteLine($"{FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion}");
 
 			return typeof(Solver).Assembly.GetName().Version.Major;
 		}, "Prints WingCalc's version number to standard output, then returns the major version number.")
