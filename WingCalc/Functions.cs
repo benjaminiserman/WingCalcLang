@@ -894,13 +894,19 @@ internal static class Functions
 			scope.Solver.WriteLine($"{{ {string.Join(", ", _functions.Keys)} }}");
 
 			return _functions.Count;
-		}, "Prints every function name in the standard library and returns the number of functions in the standard library."),
+		}, "Prints every function name in the standard library to standard output, then returns the number of functions in the standard library."),
 		new("oplist", (args, scope) =>
 		{
 			scope.Solver.WriteLine($"{{ {Operators.ListOperators()} }}");
 
 			return _functions.Count;
-		}, "Prints every the symbols of each operator in WingCalc, then returns the number of operators in WingCalc."),
+		}, "Prints the symbols of each operator in WingCalc to standard output, then returns the number of operators in WingCalc."),
+		new("version", (args, scope) =>
+		{
+			scope.Solver.WriteLine($"{typeof(Solver).Assembly.GetName().Version}");
+
+			return typeof(Solver).Assembly.GetName().Version.Major;
+		}, "Prints WingCalc's version number to standard output, then returns the major version number.")
 		#endregion
 
 	}.ToDictionary(x => x.Name, x => x);
