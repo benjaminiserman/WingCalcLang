@@ -23,6 +23,8 @@
 	<Diff>$([MSBuild]::Subtract($(Now), $(First)))</Diff>
 	<Div>$([MSBuild]::Divide($(Diff), 864000000000))</Div>
 	<Day>$([System.Math]::Floor($(Div)))</Day>
+	<GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+	<GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
 
   <Choose>
