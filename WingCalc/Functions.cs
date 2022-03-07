@@ -908,7 +908,7 @@ internal static class Functions
 			scope.Solver.WriteLine($"{FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion}");
 
 			return typeof(Solver).Assembly.GetName().Version.Major;
-		}, "Prints WingCalc's version number to standard output, then returns the major version number.")
+		}, "Prints WingCalc's version number to standard output, then returns the major version number."),
 		#endregion
 
 	}.ToDictionary(x => x.Name, x => x);
