@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 
 internal static class RomanNumeralConverter
 {

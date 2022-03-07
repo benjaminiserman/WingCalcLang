@@ -1,7 +1,7 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 using System.Collections.Generic;
 using System.Text;
-using WingCalculatorShared.Exceptions;
+using WingCalc.Exceptions;
 
 internal static class Tokenizer
 {

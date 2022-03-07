@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 using System;
 using System.Collections.Generic;
 using System.Numerics;

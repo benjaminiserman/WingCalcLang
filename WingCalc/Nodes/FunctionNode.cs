@@ -1,7 +1,7 @@
-﻿namespace WingCalculatorShared.Nodes;
+﻿namespace WingCalc.Nodes;
 using System;
 using System.Collections.Generic;
-using WingCalculatorShared.Exceptions;
+using WingCalc.Exceptions;
 
 internal record FunctionNode(string Name, LocalList Locals) : INode
 {

@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared.Nodes;
+﻿namespace WingCalc.Nodes;
 
 internal record AssignmentNode(IAssignable A, INode B) : INode
 {

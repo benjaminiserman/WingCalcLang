@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 
 internal record Scope(LocalList LocalList, Scope ParentScope, Solver Solver, string Name)
 {

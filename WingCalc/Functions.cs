@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,8 +6,8 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
-using WingCalculatorShared.Exceptions;
-using WingCalculatorShared.Nodes;
+using WingCalc.Exceptions;
+using WingCalc.Nodes;
 
 internal static class Functions
 {

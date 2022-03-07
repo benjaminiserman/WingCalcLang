@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared.Nodes;
+﻿namespace WingCalc.Nodes;
 
 internal record LambdaNode(INode Node, bool Assignable) : INode, ICallable
 {

@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared.Exceptions;
+﻿namespace WingCalc.Exceptions;
 using System;
 
 public class WingCalcException : Exception

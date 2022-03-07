@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared.Nodes;
+﻿namespace WingCalc.Nodes;
 
 internal record QuoteNode(string Text) : INode
 {

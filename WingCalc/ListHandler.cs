@@ -1,8 +1,8 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using WingCalculatorShared.Nodes;
+using WingCalc.Nodes;
 
 internal static class ListHandler
 {

@@ -1,10 +1,10 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using WingCalculatorShared.Exceptions;
-using WingCalculatorShared.Nodes;
+using WingCalc.Exceptions;
+using WingCalc.Nodes;
 
 public class Solver
 {

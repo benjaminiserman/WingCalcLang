@@ -1,5 +1,5 @@
-﻿namespace WingCalculatorShared.Nodes;
-using WingCalculatorShared.Exceptions;
+﻿namespace WingCalc.Nodes;
+using WingCalc.Exceptions;
 
 internal record LocalNode(string Name) : INode, IAssignable, IPointer, ILocal, ICallable
 {

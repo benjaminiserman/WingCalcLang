@@ -1,5 +1,5 @@
-﻿namespace WingCalculatorShared.Nodes;
-using WingCalculatorShared.Exceptions;
+﻿namespace WingCalc.Nodes;
+using WingCalc.Exceptions;
 
 internal record MacroNode(string Name, LocalList LocalList, bool Assignable) : INode, IAssignable, ICallable
 {

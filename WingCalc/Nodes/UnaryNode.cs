@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared.Nodes;
+﻿namespace WingCalc.Nodes;
 using System;
 
 internal record UnaryNode(INode A, Func<double, double> Func) : INode

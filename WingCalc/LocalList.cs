@@ -1,7 +1,7 @@
-﻿namespace WingCalculatorShared;
+﻿namespace WingCalc;
 using System.Collections.Generic;
 using System.Linq;
-using WingCalculatorShared.Exceptions;
+using WingCalc.Exceptions;
 
 internal class LocalList
 {

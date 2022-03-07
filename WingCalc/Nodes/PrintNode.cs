@@ -1,4 +1,4 @@
-﻿namespace WingCalculatorShared.Nodes;
+﻿namespace WingCalc.Nodes;
 using System;
 
 internal record PrintNode(INode A, INode B, bool Newline) : INode
