@@ -526,7 +526,7 @@ public class Solver
 
 	public double[] GetArray(double x) => ListHandler.Enumerate(new PointerNode(new ConstantNode(x)), new(null, null, this, "Out")).ToArray();
 
-	public string GetString(double x) => new(ListHandler.Enumerate(new PointerNode(new ConstantNode(x)), new(null, null, this, "Out")).Cast<char>().ToArray());
+	public string GetString(double x) => new(ListHandler.Enumerate(new PointerNode(new ConstantNode(x)), new(null, null, this, "Out")).Select(x => (char)x).ToArray());
 
 	internal INode GetMacro(string s)
 	{
