@@ -524,6 +524,10 @@ public class Solver
 		return x;
 	}
 
+	public double[] GetArray(double x) => ListHandler.Enumerate(new PointerNode(new ConstantNode(x)), new(null, null, this, "Out")).ToArray();
+
+	public string GetString(double x) => new(ListHandler.Enumerate(new PointerNode(new ConstantNode(x)), new(null, null, this, "Out")).Cast<char>().ToArray());
+
 	internal INode GetMacro(string s)
 	{
 		if (!_macros.ContainsKey(s)) throw new WingCalcException($"Macro {s} does not exist.");
