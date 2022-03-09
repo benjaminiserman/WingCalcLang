@@ -69,7 +69,7 @@ public class Solver
 
 		LocalList localScope = new();
 
-		INode node = CreateTree(tokens, out impliedAns, true);
+		INode node = CreateTree(tokens, out impliedAns, mayImplyAns: true, topLevel: true);
 
 		Scope scope = new(localScope, null, this, "Main");
 
@@ -81,7 +81,7 @@ public class Solver
 	}
 
 	private INode CreateTree(Span<Token> tokens, bool mayImplyAns = false) => CreateTree(tokens, out _, mayImplyAns);
-	private INode CreateTree(Span<Token> tokens, out bool impliedAns, bool mayImplyAns = false)
+	private INode CreateTree(Span<Token> tokens, out bool impliedAns, bool mayImplyAns = false, bool topLevel = false)
 	{
 		List<INode> availableNodes = new();
 		bool isCoefficient = false;
@@ -111,26 +111,117 @@ public class Solver
 					isCoefficient = false;
 					break;
 				}
-				case TokenType.Function:
+				case TokenType.Name:
 				{
-					if (isCoefficient)
+					switch (GetNameType(tokens[i].Text, i < tokens.Length - 1 && tokens[i + 1].TokenType == TokenType.OpenParen, topLevel, out int startIndex))
 					{
-						if (tokens[i - 1].TokenType is TokenType.Hex or TokenType.Roman)
+						case NameType.Function:
 						{
-							throw new WingCalcException($"Tokens of type {tokens[i - 1].TokenType} may not serve as function coefficients. Try adding parentheses around the function call.");
-						}
+							if (isCoefficient)
+							{
+								if (tokens[i - 1].TokenType is TokenType.Hex or TokenType.Roman)
+								{
+									throw new WingCalcException($"Tokens of type {tokens[i - 1].TokenType} may not serve as function coefficients. Try adding parentheses around the function call.");
+								}
 
-						availableNodes.Add(new PreOperatorNode("coeff"));
+								availableNodes.Add(new PreOperatorNode("coeff"));
+							}
+
+							if (i == tokens.Length - 1 || tokens[i + 1].TokenType != TokenType.OpenParen) throw new WingCalcException($"Function {tokens[i].Text} called but no opening bracket found.");
+
+							int end = FindClosing(i + 1, tokens);
+
+							availableNodes.Add(new FunctionNode(tokens[i].Text, CreateParams(tokens[(i + 2)..end])));
+
+							i = end;
+							isCoefficient = true;
+							break;
+						}
+						case NameType.Variable:
+						{
+							if (isCoefficient)
+							{
+								availableNodes.Add(new PreOperatorNode("coeff"));
+							}
+
+							if (tokens[i].Text == "$")
+							{
+								availableNodes.Add(new PreOperatorNode("$"));
+								isCoefficient = false;
+							}
+							else
+							{
+								availableNodes.Add(new VariableNode(tokens[i].Text[startIndex..]));
+								isCoefficient = true;
+							}
+
+							break;
+						}
+						case NameType.Macro:
+						{
+							if (isCoefficient)
+							{
+								availableNodes.Add(new PreOperatorNode("coeff"));
+							}
+
+							if (tokens[i].Text == "@")
+							{
+								if (i == tokens.Length - 1 || tokens[i + 1].TokenType != TokenType.OpenParen)
+								{
+									throw new WingCalcException("'@' found without a macro name and without an opening parenthesis.");
+								}
+								else
+								{
+									int end = FindClosing(i + 1, tokens);
+
+									availableNodes.Add(new LambdaNode(CreateTree(tokens[(i + 2)..end]), false));
+									isCoefficient = true;
+
+									i = end;
+								}
+							}
+							else
+							{
+								if (i == tokens.Length - 1 || tokens[i + 1].TokenType != TokenType.OpenParen)
+								{
+									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], new(), true));
+									isCoefficient = false;
+								}
+								else
+								{
+									int end = FindClosing(i + 1, tokens);
+
+									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], CreateParams(tokens[(i + 2)..end]), false));
+									isCoefficient = true;
+
+									i = end;
+								}
+							}
+
+							break;
+						}
+						case NameType.Local:
+						{
+							if (isCoefficient)
+							{
+								availableNodes.Add(new PreOperatorNode("coeff"));
+							}
+
+							if (tokens[i].Text == "#")
+							{
+								availableNodes.Add(new PreOperatorNode("#"));
+								isCoefficient = false;
+							}
+							else
+							{
+								availableNodes.Add(new LocalNode(tokens[i].Text[startIndex..]));
+								isCoefficient = true;
+							}
+
+							break;
+						}
 					}
 
-					if (i == tokens.Length - 1 || tokens[i + 1].TokenType != TokenType.OpenParen) throw new WingCalcException($"Function {tokens[i].Text} called but no opening bracket found.");
-
-					int end = FindClosing(i + 1, tokens);
-
-					availableNodes.Add(new FunctionNode(tokens[i].Text, CreateParams(tokens[(i + 2)..end])));
-
-					i = end;
-					isCoefficient = true;
 					break;
 				}
 				case TokenType.Hex:
@@ -168,69 +259,6 @@ public class Solver
 				{
 					throw new WingCalcException($"Unexpected character '{tokens[i].Text}' found.");
 				}
-				case TokenType.Variable:
-				{
-					if (isCoefficient)
-					{
-						availableNodes.Add(new PreOperatorNode("coeff"));
-					}
-
-					if (tokens[i].Text.Length == 1)
-					{
-						availableNodes.Add(new PreOperatorNode("$"));
-						isCoefficient = false;
-					}
-					else
-					{
-						availableNodes.Add(new VariableNode(tokens[i].Text[1..]));
-						isCoefficient = true;
-					}
-
-					break;
-				}
-				case TokenType.Macro:
-				{
-					if (isCoefficient)
-					{
-						availableNodes.Add(new PreOperatorNode("coeff"));
-					}
-
-					if (tokens[i].Text.Length == 1)
-					{
-						if (i == tokens.Length - 1 || tokens[i + 1].TokenType != TokenType.OpenParen)
-						{
-							throw new WingCalcException("'@' found without a macro name and without an opening parenthesis.");
-						}
-						else
-						{
-							int end = FindClosing(i + 1, tokens);
-
-							availableNodes.Add(new LambdaNode(CreateTree(tokens[(i + 2)..end]), false));
-							isCoefficient = true;
-
-							i = end;
-						}
-					}
-					else
-					{
-						if (i == tokens.Length - 1 || tokens[i + 1].TokenType != TokenType.OpenParen)
-						{
-							availableNodes.Add(new MacroNode(tokens[i].Text[1..], new(), true));
-							isCoefficient = false;
-						}
-						else
-						{
-							int end = FindClosing(i + 1, tokens);
-
-							availableNodes.Add(new MacroNode(tokens[i].Text[1..], CreateParams(tokens[(i + 2)..end]), false));
-							isCoefficient = true;
-
-							i = end;
-						}
-					}
-
-					break;
-				}
 				case TokenType.Quote:
 				{
 					availableNodes.Add(new QuoteNode(Regex.Unescape(tokens[i].Text)));
@@ -259,26 +287,6 @@ public class Solver
 
 					availableNodes.Add(new ConstantNode(Convert.ToInt32(tokens[i].Text, 8)));
 					isCoefficient = true;
-					break;
-				}
-				case TokenType.Local:
-				{
-					if (isCoefficient)
-					{
-						availableNodes.Add(new PreOperatorNode("*"));
-					}
-
-					if (tokens[i].Text.Length == 1)
-					{
-						availableNodes.Add(new PreOperatorNode("#"));
-						isCoefficient = false;
-					}
-					else
-					{
-						availableNodes.Add(new LocalNode(tokens[i].Text[1..]));
-						isCoefficient = true;
-					}
-
 					break;
 				}
 				case TokenType.Roman:
@@ -543,6 +551,8 @@ public class Solver
 		return 1;
 	}
 
+	internal bool MacroExists(string s) => _macros.ContainsKey(s);
+
 	public IEnumerable<(string, double)> GetValues()
 	{
 		foreach (var kvp in _variables)
@@ -550,4 +560,33 @@ public class Solver
 			yield return (kvp.Key, kvp.Value);
 		}
 	}
+
+	private NameType GetNameType(string s, bool nextParen, bool topLevel, out int startIndex)
+	{
+		startIndex = 1;
+
+		return s[0] switch
+		{
+			'@' => NameType.Macro,
+			'$' => NameType.Variable,
+			'#' => NameType.Local,
+			_ => Else(out startIndex)
+		};
+
+		NameType Else(out int startIndex)
+		{
+			startIndex = 0;
+
+			if (nextParen)
+			{
+				if (Functions.Exists(s)) return NameType.Function;
+				if (MacroExists(s)) return NameType.Macro;
+			}
+
+			if (topLevel) return NameType.Variable;
+			else return NameType.Local;
+		}
+	}
+
+	enum NameType { Variable, Macro, Local, Function }
 }

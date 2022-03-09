@@ -915,6 +915,8 @@ internal static class Functions
 
 	internal static Function Get(string s) => _functions[s].Function;
 
+	internal static bool Exists(string s) => _functions.ContainsKey(s);
+
 	private static long FactorialDivision(int x, int y, Scope scope)
 	{
 		if (x <= 0) throw new WingCalcException("Cannot compute permutation/combination with non-positive n.", scope);

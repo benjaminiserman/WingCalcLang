@@ -3,7 +3,17 @@ using WingCalc.Exceptions;
 
 internal record LocalNode(string Name) : INode, IAssignable, IPointer, ILocal, ICallable
 {
-	public double Solve(Scope scope) => scope.LocalList[Name, scope].Solve(scope.ParentScope);
+	public double Solve(Scope scope)
+	{
+		try
+		{
+			return scope.LocalList[Name, scope].Solve(scope.ParentScope);
+		}
+		catch (NullReferenceException)
+		{
+			throw new WingCalcException($"Scope {scope.Name} does not contain variable {Name}.");
+		}
+	}
 
 	public string GetName(Scope scope) => Name;
 

@@ -181,11 +181,8 @@ internal static class Tokenizer
 
 		_ when c is '.' => throw new WingCalcException($"Unexpected character '{c}' found!"),
 
-		TokenType.Local => char.IsLetterOrDigit(c),
-		TokenType.Function => char.IsLetter(c),
+		TokenType.Name => char.IsLetterOrDigit(c),
 		TokenType.Hex => char.IsDigit(c) || _hexCharacters.Contains(c),
-		TokenType.Variable => char.IsLetterOrDigit(c),
-		TokenType.Macro => char.IsLetterOrDigit(c),
 		TokenType.Binary => c is '1' or '0',
 		TokenType.Octal => char.IsDigit(c) && (c - '0') < 8,
 		TokenType.Roman => RomanNumeralConverter.IsNumeral(c) || c == '̅',
@@ -197,13 +194,10 @@ internal static class Tokenizer
 	{
 		if (char.IsDigit(c) || ".".Contains(c)) return TokenType.Number;
 		else if (_operatorCharacters.Contains(c)) return TokenType.Operator;
-		else if (char.IsLetter(c)) return TokenType.Function;
-		else if (c == '#') return TokenType.Local;
+		else if (char.IsLetter(c) || "@$#".Contains(c)) return TokenType.Name;
 		else if (_openParenCharacters.Contains(c)) return TokenType.OpenParen;
 		else if (_closeParenCharacters.Contains(c)) return TokenType.CloseParen;
 		else if (c == ',') return TokenType.Comma;
-		else if (c == '$') return TokenType.Variable;
-		else if (c == '@') return TokenType.Macro;
 		else throw new WingCalcException($"Token could not be constructed from character {c}.");
 	}
 }
@@ -212,5 +206,5 @@ internal record Token(TokenType TokenType, string Text);
 
 internal enum TokenType
 {
-	Number, Operator, Function, Hex, OpenParen, CloseParen, Comma, Variable, Macro, Quote, Char, Binary, Octal, Local, Roman
+	Number, Operator, Name, Hex, OpenParen, CloseParen, Comma, Quote, Char, Binary, Octal, Roman
 }
