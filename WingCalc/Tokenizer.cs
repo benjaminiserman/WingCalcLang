@@ -181,11 +181,11 @@ internal static class Tokenizer
 
 		_ when c is '.' => throw new WingCalcException($"Unexpected character '{c}' found!"),
 
-		TokenType.Local => char.IsLetter(c),
+		TokenType.Local => char.IsLetterOrDigit(c),
 		TokenType.Function => char.IsLetter(c),
 		TokenType.Hex => char.IsDigit(c) || _hexCharacters.Contains(c),
-		TokenType.Variable => char.IsLetter(c),
-		TokenType.Macro => char.IsLetter(c),
+		TokenType.Variable => char.IsLetterOrDigit(c),
+		TokenType.Macro => char.IsLetterOrDigit(c),
 		TokenType.Binary => c is '1' or '0',
 		TokenType.Octal => char.IsDigit(c) && (c - '0') < 8,
 		TokenType.Roman => RomanNumeralConverter.IsNumeral(c) || c == '̅',
