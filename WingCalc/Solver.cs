@@ -113,7 +113,7 @@ public class Solver
 				}
 				case TokenType.Name:
 				{
-					switch (GetNameType(tokens[i].Text, i < tokens.Length - 1 && tokens[i + 1].TokenType == TokenType.OpenParen, topLevel, out int startIndex))
+					switch (GetNameType(tokens, i, topLevel, out int startIndex))
 					{
 						case NameType.Function:
 						{
@@ -174,7 +174,7 @@ public class Solver
 								{
 									int end = FindClosing(i + 1, tokens);
 
-									availableNodes.Add(new LambdaNode(CreateTree(tokens[(i + 2)..end]), false));
+									availableNodes.Add(new LambdaNode(CreateTree(tokens[(i + 2)..end])));
 									isCoefficient = true;
 
 									i = end;
@@ -191,7 +191,7 @@ public class Solver
 								{
 									int end = FindClosing(i + 1, tokens);
 
-									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], CreateParams(tokens[(i + 2)..end]), false));
+									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], CreateParams(tokens[(i + 2)..end]), true));
 									isCoefficient = true;
 
 									i = end;
@@ -561,19 +561,22 @@ public class Solver
 		}
 	}
 
-	private NameType GetNameType(string s, bool nextParen, bool topLevel, out int startIndex)
+	private NameType GetNameType(Span<Token> tokens, int i, bool topLevel, out int startIndex)
 	{
+		bool nextParen = i < tokens.Length - 1 && tokens[i + 1].TokenType == TokenType.OpenParen;
 		startIndex = 1;
+
+		string s = tokens[i].Text;
 
 		return s[0] switch
 		{
 			'@' => NameType.Macro,
 			'$' => NameType.Variable,
 			'#' => NameType.Local,
-			_ => Else(out startIndex)
+			_ => Else(tokens, out startIndex)
 		};
 
-		NameType Else(out int startIndex)
+		NameType Else(Span<Token> tokens, out int startIndex)
 		{
 			startIndex = 0;
 
@@ -581,7 +584,46 @@ public class Solver
 			{
 				if (Functions.Exists(s)) return NameType.Function;
 				if (MacroExists(s)) return NameType.Macro;
+
+				int open = 1;
+				for (int j = i + 2; j < tokens.Length; j++)
+				{
+					switch (tokens[j].TokenType)
+					{
+						case TokenType.OpenParen:
+						{
+							open++;
+							break;
+						}
+						case TokenType.CloseParen:
+						{
+							open--;
+							break;
+						}
+						case TokenType.Operator:
+						{
+							if (open == 0)
+							{
+								int precedence = Operators.GetPrecedence(tokens[j].Text);
+								int assignmentPrecedence = Operators.GetPrecedence("=");
+
+								if (precedence == assignmentPrecedence)
+								{
+									return NameType.Macro;
+								}
+								else if (precedence > assignmentPrecedence)
+								{
+									goto outerBreak;
+								}
+							}
+
+							break;
+						}
+					}
+				}
 			}
+
+		outerBreak:;
 
 			if (topLevel) return NameType.Variable;
 			else return NameType.Local;

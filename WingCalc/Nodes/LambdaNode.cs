@@ -1,6 +1,6 @@
 ﻿namespace WingCalc.Nodes;
 
-internal record LambdaNode(INode Node, bool Assignable) : INode, ICallable
+internal record LambdaNode(INode Node) : INode, ICallable
 {
 	public double Solve(Scope scope) => Node.Solve(new(new(), scope, scope.Solver, $"Lambda"));
 
