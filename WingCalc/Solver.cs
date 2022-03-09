@@ -53,6 +53,7 @@ public class Solver
 	};
 
 	private readonly Dictionary<string, INode> _macros = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Stack<List<string>> _localNameStack = new();
 
 	public Action<string> WriteLine { get; set; } = Console.WriteLine;
 	public Action<string> WriteError { get; set; } = Console.WriteLine;
@@ -67,6 +68,8 @@ public class Solver
 	{
 		var tokens = Tokenizer.Tokenize(s).ToArray();
 
+		_localNameStack.Clear();
+		_localNameStack.Push(new());
 		LocalList localScope = new();
 
 		INode node = CreateTree(tokens, out impliedAns, mayImplyAns: true, topLevel: true);
@@ -80,7 +83,7 @@ public class Solver
 		return solve;
 	}
 
-	private INode CreateTree(Span<Token> tokens, bool mayImplyAns = false) => CreateTree(tokens, out _, mayImplyAns);
+	private INode CreateTree(Span<Token> tokens, bool mayImplyAns = false, bool topLevel = false) => CreateTree(tokens, out _, mayImplyAns, topLevel);
 	private INode CreateTree(Span<Token> tokens, out bool impliedAns, bool mayImplyAns = false, bool topLevel = false)
 	{
 		List<INode> availableNodes = new();
@@ -109,6 +112,58 @@ public class Solver
 				{
 					availableNodes.Add(new PreOperatorNode(tokens[i].Text));
 					isCoefficient = false;
+
+					if (Operators.GetPrecedence(tokens[i].Text) == Operators.GetPrecedence("=") && availableNodes[^2] is MacroNode) // macro assignment
+					{
+						_localNameStack.Push(new());
+						int end = GetEnd(tokens, i + 1);
+
+						INode tree = CreateTree(tokens[(i + 1)..end], topLevel: false);
+						
+						_localNameStack.Pop();
+
+						i = end - 1;
+						availableNodes.Add(tree);
+
+						int GetEnd(Span<Token> tokens, int i)
+						{
+							int open = 0;
+							for (int j = i + 1; j < tokens.Length; j++)
+							{
+								switch (tokens[j].TokenType)
+								{
+									case TokenType.OpenParen:
+									{
+										open++;
+										break;
+									}
+									case TokenType.CloseParen:
+									{
+										open--;
+										break;
+									}
+									case TokenType.Operator:
+									{
+										if (open == 0)
+										{
+											int precedence = Operators.GetPrecedence(tokens[j].Text);
+											int assignmentPrecedence = Operators.GetPrecedence("=");
+
+											if (precedence > assignmentPrecedence)
+											{
+												return j;
+											}
+										}
+
+										break;
+									}
+								}
+							}
+
+							return tokens.Length;
+						}
+					}
+
 					break;
 				}
 				case TokenType.Name:
@@ -131,8 +186,8 @@ public class Solver
 
 							int end = FindClosing(i + 1, tokens);
 
-							availableNodes.Add(new FunctionNode(tokens[i].Text, CreateParams(tokens[(i + 2)..end])));
-
+							availableNodes.Add(new FunctionNode(tokens[i].Text, CreateParams(tokens[(i + 2)..end], out int newPushed)));
+							
 							i = end;
 							isCoefficient = true;
 							break;
@@ -173,9 +228,8 @@ public class Solver
 								else
 								{
 									int end = FindClosing(i + 1, tokens);
-
 									availableNodes.Add(new LambdaNode(CreateTree(tokens[(i + 2)..end])));
-									isCoefficient = true;
+																		isCoefficient = true;
 
 									i = end;
 								}
@@ -191,8 +245,8 @@ public class Solver
 								{
 									int end = FindClosing(i + 1, tokens);
 
-									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], CreateParams(tokens[(i + 2)..end]), true));
-									isCoefficient = true;
+									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], CreateParams(tokens[(i + 2)..end], out int newPushed), true));
+																		isCoefficient = true;
 
 									i = end;
 								}
@@ -214,6 +268,7 @@ public class Solver
 							}
 							else
 							{
+								_localNameStack.Peek().Add(tokens[i].Text[startIndex..]);
 								availableNodes.Add(new LocalNode(tokens[i].Text[startIndex..]));
 								isCoefficient = true;
 							}
@@ -241,8 +296,8 @@ public class Solver
 
 					int end = FindClosing(i, tokens);
 
-					INode tree = CreateTree(tokens[(i + 1)..end]);
-
+					INode tree = CreateTree(tokens[(i + 1)..end], topLevel: topLevel);
+					
 					availableNodes.Add(tree);
 
 					if (tree is null) throw new WingCalcException($"Empty brackets {tokens[i].Text}{tokens[end].Text} found.");
@@ -440,10 +495,11 @@ public class Solver
 		else return availableNodes.First();
 	}
 
-	private LocalList CreateParams(Span<Token> tokens)
+	private LocalList CreateParams(Span<Token> tokens, out int pushed)
 	{
 		List<INode> nodes = new();
 		int next = 0;
+		pushed = 0;
 
 		int level = 1;
 		for (int i = 0; i < tokens.Length; i++)
@@ -573,10 +629,10 @@ public class Solver
 			'@' => NameType.Macro,
 			'$' => NameType.Variable,
 			'#' => NameType.Local,
-			_ => Else(tokens, out startIndex)
+			_ => Else(tokens, s, out startIndex)
 		};
 
-		NameType Else(Span<Token> tokens, out int startIndex)
+		NameType Else(Span<Token> tokens, string s, out int startIndex)
 		{
 			startIndex = 0;
 
@@ -584,49 +640,54 @@ public class Solver
 			{
 				if (Functions.Exists(s)) return NameType.Function;
 				if (MacroExists(s)) return NameType.Macro;
+				if (IsAssignment(tokens, i)) return NameType.Macro;
+			}
 
-				int open = 1;
-				for (int j = i + 2; j < tokens.Length; j++)
+			if (topLevel) return NameType.Variable;
+			else if (IsAssignment(tokens, i) || _localNameStack.Peek().Contains(s, StringComparer.OrdinalIgnoreCase)) return NameType.Local;
+			else return NameType.Variable;
+		}
+
+		bool IsAssignment(Span<Token> tokens, int i)
+		{
+			int open = 0;
+			for (int j = i + 1; j < tokens.Length; j++)
+			{
+				switch (tokens[j].TokenType)
 				{
-					switch (tokens[j].TokenType)
+					case TokenType.OpenParen:
 					{
-						case TokenType.OpenParen:
+						open++;
+						break;
+					}
+					case TokenType.CloseParen:
+					{
+						open--;
+						break;
+					}
+					case TokenType.Operator:
+					{
+						if (open == 0)
 						{
-							open++;
-							break;
-						}
-						case TokenType.CloseParen:
-						{
-							open--;
-							break;
-						}
-						case TokenType.Operator:
-						{
-							if (open == 0)
+							int precedence = Operators.GetPrecedence(tokens[j].Text);
+							int assignmentPrecedence = Operators.GetPrecedence("=");
+
+							if (precedence == assignmentPrecedence)
 							{
-								int precedence = Operators.GetPrecedence(tokens[j].Text);
-								int assignmentPrecedence = Operators.GetPrecedence("=");
-
-								if (precedence == assignmentPrecedence)
-								{
-									return NameType.Macro;
-								}
-								else if (precedence > assignmentPrecedence)
-								{
-									goto outerBreak;
-								}
+								return true;
 							}
-
-							break;
+							else if (precedence > assignmentPrecedence)
+							{
+								return false;
+							}
 						}
+
+						break;
 					}
 				}
 			}
 
-		outerBreak:;
-
-			if (topLevel) return NameType.Variable;
-			else return NameType.Local;
+			return false;
 		}
 	}
 
