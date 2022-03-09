@@ -142,6 +142,8 @@ internal static class Operators
 		}
 	}
 
+	public static bool IsBinary(string symbol) => _operators.ContainsKey(symbol);
+
 	public static Func<double, double, double> GetOperatorFunction(string symbol) => _operations[symbol];
 
 	record struct Operator(string Symbol, Func<INode, INode, INode> Construct, int Precedence, string Documentation);

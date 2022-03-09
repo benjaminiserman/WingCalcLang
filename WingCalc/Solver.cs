@@ -52,7 +52,7 @@ public class Solver
 		["ඞ"] = 1337,
 	};
 
-	private readonly Dictionary<string, INode> _macros = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Dictionary<string, Macro> _macros = new(StringComparer.OrdinalIgnoreCase);
 	private readonly Stack<List<string>> _localNameStack = new();
 
 	public Action<string> WriteLine { get; set; } = Console.WriteLine;
@@ -66,6 +66,12 @@ public class Solver
 
 	public double Solve(string s, out bool impliedAns, bool setAns = true)
 	{
+		if (string.IsNullOrWhiteSpace(s))
+		{
+			impliedAns = false;
+			return 0;
+		}
+
 		var tokens = Tokenizer.Tokenize(s).ToArray();
 
 		_localNameStack.Clear();
@@ -113,10 +119,15 @@ public class Solver
 					availableNodes.Add(new PreOperatorNode(tokens[i].Text));
 					isCoefficient = false;
 
-					if (Operators.GetPrecedence(tokens[i].Text) == Operators.GetPrecedence("=") && availableNodes[^2] is MacroNode) // macro assignment
+					if (Operators.IsBinary(tokens[i].Text) && Operators.GetPrecedence(tokens[i].Text) == Operators.GetPrecedence("=") && availableNodes[^2] is MacroNode mn) // macro assignment
 					{
 						_localNameStack.Push(new());
 						int end = GetEnd(tokens, i + 1);
+
+						foreach (var alias in mn.GetAliases())
+						{
+							_localNameStack.Peek().Add(alias);
+						}
 
 						INode tree = CreateTree(tokens[(i + 1)..end], topLevel: false);
 						
@@ -128,7 +139,7 @@ public class Solver
 						int GetEnd(Span<Token> tokens, int i)
 						{
 							int open = 0;
-							for (int j = i + 1; j < tokens.Length; j++)
+							for (int j = i; j < tokens.Length; j++)
 							{
 								switch (tokens[j].TokenType)
 								{
@@ -144,7 +155,7 @@ public class Solver
 									}
 									case TokenType.Operator:
 									{
-										if (open == 0)
+										if (Operators.IsBinary(tokens[j].Text) && open == 0)
 										{
 											int precedence = Operators.GetPrecedence(tokens[j].Text);
 											int assignmentPrecedence = Operators.GetPrecedence("=");
@@ -592,14 +603,14 @@ public class Solver
 
 	public string GetString(double x) => new(ListHandler.Enumerate(new PointerNode(new ConstantNode(x)), new(null, null, this, "Out")).Select(x => (char)x).ToArray());
 
-	internal INode GetMacro(string s)
+	internal Macro GetMacro(string s)
 	{
 		if (!_macros.ContainsKey(s)) throw new WingCalcException($"Macro {s} does not exist.");
 
 		return _macros[s];
 	}
 
-	internal double SetMacro(string s, INode x)
+	internal double SetMacro(string s, Macro x)
 	{
 		if (_macros.ContainsKey(s)) _macros[s] = x;
 		else _macros.Add(s, x);
@@ -608,6 +619,8 @@ public class Solver
 	}
 
 	internal bool MacroExists(string s) => _macros.ContainsKey(s);
+
+	internal record Macro(INode Node, List<string> Aliases);
 
 	public IEnumerable<(string, double)> GetValues()
 	{

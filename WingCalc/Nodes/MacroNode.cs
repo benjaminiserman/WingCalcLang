@@ -3,21 +3,55 @@ using WingCalc.Exceptions;
 
 internal record MacroNode(string Name, LocalList LocalList, bool Assignable) : INode, IAssignable, ICallable
 {
-	public double Solve(Scope scope) => scope.Solver.GetMacro(Name).Solve(new(LocalList, scope, scope.Solver, Name));
+	public double Solve(Scope scope)
+	{
+		Solver.Macro macro = scope.Solver.GetMacro(Name);
+
+		for (double i = 0; i < macro.Aliases.Count; i++)
+		{
+			LocalList.Set(macro.Aliases[(int)i], LocalList[i.ToString(), scope]);
+		}
+
+		return macro.Node.Solve(new(LocalList, scope, scope.Solver, Name));
+	}
 
 	public double Assign(INode a, Scope scope)
 	{
-		if (Assignable) return scope.Solver.SetMacro(Name, a);
-		else throw new WingCalcException("Macros with arguments cannot be assigned to.", scope);
+		if (Assignable)
+		{
+			return scope.Solver.SetMacro(Name, new(a, GetAliases()));
+		}
+		else
+		{
+			throw new WingCalcException("Macros with arguments cannot be assigned to.", scope);
+		}
 	}
 
 	public double DeepAssign(INode a, Scope scope)
 	{
-		INode node = scope.Solver.GetMacro(Name);
+		INode node = scope.Solver.GetMacro(Name).Node;
 
 		if (node is IAssignable ia) return ia.DeepAssign(a, scope);
 		else return Assign(a.GetAssign(scope), scope);
 	}
 
-	public double Call(Scope scope, LocalList list) => scope.Solver.GetMacro(Name).Solve(new(list, scope, scope.Solver, Name));
+	public double Call(Scope scope, LocalList list) => Solve(new(list, scope, scope.Solver, Name));
+
+	public List<string> GetAliases()
+	{
+		List<string> aliases = new();
+	
+		for (double i = 0; LocalList.Contains(i.ToString()); i++)
+		{
+			aliases.Add(LocalList[i.ToString(), null] switch
+			{
+				VariableNode vn => vn.Name,
+				LocalNode ln => ln.Name,
+				MacroNode mn => mn.Name,
+				_ => throw new WingCalcException($"{LocalList[i.ToString(), null].GetType().Name} is not a valid alias for a macro node.")
+			});
+		}
+
+		return aliases;
+	}
 }
