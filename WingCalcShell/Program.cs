@@ -1,5 +1,4 @@
 ﻿using WingCalc;
-using System.Text;
 
 Solver solver = new();
 
@@ -10,7 +9,7 @@ while (true)
 	try
 	{
 		string s = Console.ReadLine();
-		
+
 		double ans = solver.Solve(s);
 		solver.SetVariable("ANS", ans);
 
