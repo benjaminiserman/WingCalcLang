@@ -5,13 +5,13 @@ using WingCalc.Exceptions;
 
 internal class LocalList
 {
-	private readonly Dictionary<string, INode> _nodes = new();
+	private readonly Dictionary<string, INode> _nodes = new(StringComparer.OrdinalIgnoreCase);
 
 	public LocalList() { }
 
 	public LocalList(ICollection<INode> nodes)
 	{
-		_nodes = nodes.Select((n, i) => (n, i)).ToDictionary(x => x.i.ToString(), x => x.n);
+		_nodes = nodes.Select((n, i) => (n, i)).ToDictionary(x => x.i.ToString(), x => x.n, StringComparer.OrdinalIgnoreCase);
 	}
 
 	public INode this[string name, Scope scope]

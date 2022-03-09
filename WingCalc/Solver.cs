@@ -8,7 +8,7 @@ using WingCalc.Nodes;
 
 public class Solver
 {
-	private readonly Dictionary<string, double> _variables = new()
+	private readonly Dictionary<string, double> _variables = new(StringComparer.OrdinalIgnoreCase)
 	{
 		["PI"] = Math.PI,
 		["TAU"] = Math.Tau,
@@ -52,7 +52,7 @@ public class Solver
 		["ඞ"] = 1337,
 	};
 
-	private readonly Dictionary<string, INode> _macros = new();
+	private readonly Dictionary<string, INode> _macros = new(StringComparer.OrdinalIgnoreCase);
 
 	public Action<string> WriteLine { get; set; } = Console.WriteLine;
 	public Action<string> WriteError { get; set; } = Console.WriteLine;
