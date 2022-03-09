@@ -78,6 +78,7 @@ internal static class Operators
 		new("&=", (a, b) => new CompoundAssignmentNode((IAssignable)a, "&", b), _precedenceTiers["assignment"], "Computes the & of its operands, and assigns that value to its left-hand operand and returns it."),
 		new("^=", (a, b) => new CompoundAssignmentNode((IAssignable)a, "^", b), _precedenceTiers["assignment"], "Computes the ^ of its operands, and assigns that value to its left-hand operand and returns it."),
 		new("|=", (a, b) => new CompoundAssignmentNode((IAssignable)a, "|", b), _precedenceTiers["assignment"], "Computes the | of its operands, and assigns that value to its left-hand operand and returns it."),
+		new(";=", (a, b) => new CompoundAssignmentNode((IAssignable)a, ";", b), _precedenceTiers["assignment"], "Computes the ; of its operands, and assigns that value to its left-hand operand and returns it."),
 
 		new("?=", (a, b) => new ElvisAssignmentNode((IAssignable)a, b), _precedenceTiers["assignment"], "Computes the ?: of its operands, and assigns that value to its left-hand operand and returns it."),
 		new("=", (a, b) => new AssignmentNode((IAssignable)a, b), _precedenceTiers["assignment"], "Assigns its right-hand operand to its left-hand operand."),
