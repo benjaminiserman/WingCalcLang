@@ -53,7 +53,7 @@ public class Solver
 	};
 
 	private readonly Dictionary<string, Macro> _macros = new(StringComparer.OrdinalIgnoreCase);
-	private readonly Stack<List<string>> _localNameStack = new();
+	private readonly Stack<List<(string, NameType)>> _localNameStack = new();
 
 	public Action<string> WriteLine { get; set; } = Console.WriteLine;
 	public Action<string> WriteError { get; set; } = Console.WriteLine;
@@ -126,12 +126,14 @@ public class Solver
 
 						foreach (var alias in mn.GetAliases())
 						{
-							_localNameStack.Peek().Add(alias);
+							_localNameStack.Peek().Add((alias, NameType.Local));
 						}
 
 						INode tree = CreateTree(tokens[(i + 1)..end], topLevel: false);
 						
 						_localNameStack.Pop();
+
+						_localNameStack.Peek().Add((mn.Name, NameType.Macro));
 
 						i = end - 1;
 						availableNodes.Add(tree);
@@ -197,7 +199,7 @@ public class Solver
 
 							int end = FindClosing(i + 1, tokens);
 
-							availableNodes.Add(new FunctionNode(tokens[i].Text, CreateParams(tokens[(i + 2)..end], out int newPushed)));
+							availableNodes.Add(new FunctionNode(tokens[i].Text, new(CreateParams(tokens[(i + 2)..end]))));
 							
 							i = end;
 							isCoefficient = true;
@@ -238,10 +240,21 @@ public class Solver
 								}
 								else
 								{
+									_localNameStack.Push(new());
 									int end = FindClosing(i + 1, tokens);
-									availableNodes.Add(new LambdaNode(CreateTree(tokens[(i + 2)..end])));
-																		isCoefficient = true;
+									List<INode> lambdaArgs = CreateParams(tokens[(i + 2)..end], true);
 
+									_localNameStack.Pop();
+
+									availableNodes.Add(new LambdaNode(lambdaArgs[^1], lambdaArgs.GetRange(0, lambdaArgs.Count - 1).Select(x => x switch
+									{
+										VariableNode vn => vn.Name,
+										LocalNode ln => ln.Name,
+										MacroNode mn => mn.Name,
+										_ => throw new WingCalcException($"{x.GetType().Name} is not a valid alias for a lambda argument.")
+									}).ToList()));
+
+									isCoefficient = true;
 									i = end;
 								}
 							}
@@ -256,9 +269,9 @@ public class Solver
 								{
 									int end = FindClosing(i + 1, tokens);
 
-									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], CreateParams(tokens[(i + 2)..end], out int newPushed), true));
-																		isCoefficient = true;
+									availableNodes.Add(new MacroNode(tokens[i].Text[startIndex..], new(CreateParams(tokens[(i + 2)..end])), true));
 
+									isCoefficient = true;
 									i = end;
 								}
 							}
@@ -279,7 +292,7 @@ public class Solver
 							}
 							else
 							{
-								_localNameStack.Peek().Add(tokens[i].Text[startIndex..]);
+								_localNameStack.Peek().Add((tokens[i].Text[startIndex..], NameType.Local));
 								availableNodes.Add(new LocalNode(tokens[i].Text[startIndex..]));
 								isCoefficient = true;
 							}
@@ -506,11 +519,10 @@ public class Solver
 		else return availableNodes.First();
 	}
 
-	private LocalList CreateParams(Span<Token> tokens, out int pushed)
+	private List<INode> CreateParams(Span<Token> tokens, bool pushToStack = false)
 	{
 		List<INode> nodes = new();
 		int next = 0;
-		pushed = 0;
 
 		int level = 1;
 		for (int i = 0; i < tokens.Length; i++)
@@ -534,6 +546,18 @@ public class Solver
 						Span<Token> treeSpan = tokens[next..i];
 						if (treeSpan.Length < 1) throw new WingCalcException("Empty parameters are not allowed.");
 						nodes.Add(CreateTree(treeSpan));
+
+						if (pushToStack)
+						{
+							_localNameStack.Peek().Add(nodes[^1] switch
+							{
+								VariableNode vn => (vn.Name, NameType.Local),
+								LocalNode ln => (ln.Name, NameType.Local),
+								MacroNode mn => (mn.Name, NameType.Local),
+								_ => throw new WingCalcException($"Invalid lambda alias {nodes[^1]} found.")
+							});
+						}
+
 						next = i == tokens.Length - 1
 							? -1
 							: i + 1;
@@ -549,7 +573,7 @@ public class Solver
 			nodes.Add(CreateTree(tokens[next..tokens.Length]));
 		}
 
-		return new(nodes);
+		return nodes;
 	}
 
 	private int FindClosing(int start, Span<Token> tokens)
@@ -652,12 +676,12 @@ public class Solver
 			if (nextParen)
 			{
 				if (Functions.Exists(s)) return NameType.Function;
-				if (MacroExists(s)) return NameType.Macro;
+				if (MacroExists(s) || _localNameStack.Any(x => x.Any(y => StringComparer.OrdinalIgnoreCase.Compare(y.Item1, s) == 0 && y.Item2 == NameType.Macro))) return NameType.Macro;
 				if (IsAssignment(tokens, i)) return NameType.Macro;
 			}
 
 			if (topLevel) return NameType.Variable;
-			else if (IsAssignment(tokens, i) || _localNameStack.Peek().Contains(s, StringComparer.OrdinalIgnoreCase)) return NameType.Local;
+			else if (IsAssignment(tokens, i) || _localNameStack.Any(x => x.Any(y => StringComparer.OrdinalIgnoreCase.Compare(y.Item1, s) == 0 && y.Item2 == NameType.Local))) return NameType.Local;
 			else return NameType.Variable;
 		}
 

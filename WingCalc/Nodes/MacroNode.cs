@@ -48,7 +48,7 @@ internal record MacroNode(string Name, LocalList LocalList, bool Assignable) : I
 				VariableNode vn => vn.Name,
 				LocalNode ln => ln.Name,
 				MacroNode mn => mn.Name,
-				_ => throw new WingCalcException($"{LocalList[i.ToString(), null].GetType().Name} is not a valid alias for a macro node.")
+				_ => throw new WingCalcException($"{LocalList[i.ToString(), null].GetType().Name} is not a valid alias for a macro argument.")
 			});
 		}
 

@@ -66,7 +66,7 @@ internal record LocalNode(string Name) : INode, IAssignable, IPointer, ILocal, I
 
 	public double Get(string address, Scope scope)
 	{
-		INode node = scope.LocalList[Address(scope), scope];
+		INode node = scope.LocalList[Name, scope];
 
 		if (node is IPointer pointer and not ILocal) return pointer.Get(address, scope);
 		else throw new WingCalcException($"#{Name} could not be interpreted as a pointer.", scope);
@@ -76,7 +76,7 @@ internal record LocalNode(string Name) : INode, IAssignable, IPointer, ILocal, I
 
 	public double Call(Scope scope, LocalList list)
 	{
-		INode node = scope.LocalList[Address(scope), scope];
+		INode node = scope.LocalList[Name, scope];
 
 		if (node is ICallable callable and not ILocal) return callable.Call(scope, list);
 		else throw new WingCalcException($"#{Name} could not be interpreted as callable.", scope);
