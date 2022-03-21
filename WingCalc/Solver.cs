@@ -519,7 +519,7 @@ public class Solver
 		else return availableNodes.First();
 	}
 
-	private List<INode> CreateParams(Span<Token> tokens, bool pushToStack = false)
+	private List<INode> CreateParams(Span<Token> tokens, bool isLambda = false)
 	{
 		List<INode> nodes = new();
 		int next = 0;
@@ -544,10 +544,23 @@ public class Solver
 					if (level == 1)
 					{
 						Span<Token> treeSpan = tokens[next..i];
-						if (treeSpan.Length < 1) throw new WingCalcException("Empty parameters are not allowed.");
-						nodes.Add(CreateTree(treeSpan));
+						if (treeSpan.Length < 1)
+						{
+							if (isLambda)
+							{
+								nodes.Add(new LocalNode("_"));
+							}
+							else
+							{
+								throw new WingCalcException("Empty parameters are not allowed.");
+							}
+						}
+						else
+						{
+							nodes.Add(CreateTree(treeSpan));
+						}
 
-						if (pushToStack)
+						if (isLambda)
 						{
 							_localNameStack.Peek().Add(nodes[^1] switch
 							{

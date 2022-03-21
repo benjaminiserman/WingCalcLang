@@ -35,7 +35,19 @@ internal record MacroNode(string Name, LocalList LocalList, bool Assignable) : I
 		else return Assign(a.GetAssign(scope), scope);
 	}
 
-	public double Call(Scope scope, LocalList list) => Solve(new(list, scope, scope.Solver, Name));
+	public double Call(Scope scope, LocalList list)
+	{
+		for (double i = 0; true; i++)
+		{
+			if (list.Contains(i.ToString()))
+			{
+				LocalList.Set(i.ToString(), list[i, scope]);
+			}
+			else break;
+		}
+
+		return Solve(scope);
+	}
 
 	public List<string> GetAliases()
 	{
