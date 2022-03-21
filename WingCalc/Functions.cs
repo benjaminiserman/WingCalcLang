@@ -386,137 +386,66 @@ internal static class Functions
 		new("iter", (args, scope) =>
 		{
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"iter\" requires a pointer node as its first argument.", scope);
-			IAssignable lambdaVar = args[1] as IAssignable ?? throw new WingCalcException("Function \"iter\" requires an assignable node as its second argument.", scope);
+			ICallable lambda = args[1] as ICallable ?? throw new WingCalcException("Function \"iter\" requires a callable node as its second argument.", scope);
 
-			if (args.Count >= 4)
+			foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
 			{
-				IAssignable indexVar = args[2] as IAssignable ?? throw new WingCalcException("Function \"iter\" requires an assignable node as its third argument.", scope);
-				foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
-				{
-					lambdaVar.Assign(x, scope);
-					indexVar.Assign(i, scope);
-					args[3].Solve(scope);
-				}
-			}
-			else
-			{
-				foreach (double x in ListHandler.Enumerate(pointer, scope))
-				{
-					lambdaVar.Assign(x, scope);
-					args[2].Solve(scope);
-				}
+				lambda.Call(scope, new(new List<INode>() { new ConstantNode(x), new ConstantNode(i) }));
 			}
 
 			return ListHandler.Enumerate(pointer, scope).Count();
-		}, "Enumerates through the list at the pointer represented by its first argument, assigning each value found to the assignable node represented by its second argument. If there are three arguments, $name evaluates the expression represented by its third argument for each element of the list. Otherwise, $name assigns the index of each value found to the assignable node represented by the second argument, and evaluates the expression represented by its fourth argument for each element of the list. Finally, $name returns the number of elements contained within the list."),
+		}, "Enumerates through the list at the pointer represented by its first argument, calling the lambda represented by its second argument on each element. The lambda is called with its first argument being the element found, and its second argument being the index of that element. Finally, $name returns the number of elements contained within the list."),
 		new("filter", (args, scope) =>
 		{
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"filter\" requires a pointer node as its first argument.", scope);
-			IAssignable lambdaVar = args[1] as IAssignable ?? throw new WingCalcException("Function \"filter\" requires an assignable node as its second argument.", scope);
+			ICallable lambda = args[1] as ICallable ?? throw new WingCalcException("Function \"filter\" requires a callable node as its second argument.", scope);
 
 			List<double> filtered = new();
 
-			if (args.Count >= 4)
+			foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
 			{
-				IAssignable indexVar = args[2] as IAssignable ?? throw new WingCalcException("Function \"filter\" requires an assignable node as its third argument.", scope);
-				foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
+				if (lambda.Call(scope, new(new List<INode>() { new ConstantNode(x), new ConstantNode(i) })) != 0)
 				{
-					lambdaVar.Assign(x, scope);
-					indexVar.Assign(i, scope);
-
-					if (args[3].Solve(scope) != 0)
-					{
-						filtered.Add(x);
-					}
-				}
-			}
-			else
-			{
-				foreach (double x in ListHandler.Enumerate(pointer, scope))
-				{
-					lambdaVar.Assign(x, scope);
-
-					if (args[2].Solve(scope) != 0)
-					{
-						filtered.Add(x);
-					}
+					filtered.Add(x);
 				}
 			}
 
 			ListHandler.Allocate(pointer, filtered, scope);
 
 			return ListHandler.Enumerate(pointer, scope).Count();
-		}, "Enumerates through the list at the pointer represented by its first argument, assigning each value found to the assignable node represented by its second argument. If there are three arguments, $name evaluates the expression represented by its third argument for each element of the list. Otherwise, $name assigns the index of each value found to the assignable node represented by the second argument, and evaluates the expression represented by its fourth argument for each element of the list. For each element in the list, if the expression evaluated to 0, that element is removed from the list. Finally, $name returns address of the pointer represented by its first argument."),
+		}, "Enumerates through the list at the pointer represented by its first argument, calling the lambda represented by its second argument on each element. The lambda is called with its first argument being the element found, and its second argument being the index of that element. For each element in the list, if the lambda evaluated to 0, that element is removed from the list. Finally, $name returns address of the pointer represented by its first argument."),
 		new("any", (args, scope) =>
 		{
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"any\" requires a pointer node as its first argument.", scope);
-			IAssignable lambdaVar = args[1] as IAssignable ?? throw new WingCalcException("Function \"any\" requires an assignable node as its second argument.", scope);
+			ICallable lambda = args[1] as ICallable ?? throw new WingCalcException("Function \"any\" requires a callable node as its second argument.", scope);
 
-			if (args.Count >= 4)
+			foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
 			{
-				IAssignable indexVar = args[2] as IAssignable ?? throw new WingCalcException("Function \"any\" requires an assignable node as its third argument.", scope);
-				foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
+				if (lambda.Call(scope, new(new List<INode>() { new ConstantNode(x), new ConstantNode(i) })) != 0)
 				{
-					lambdaVar.Assign(x, scope);
-					indexVar.Assign(i, scope);
-
-					if (args[3].Solve(scope) != 0)
-					{
-						return 1;
-					}
-				}
-			}
-			else
-			{
-				foreach (double x in ListHandler.Enumerate(pointer, scope))
-				{
-					lambdaVar.Assign(x, scope);
-
-					if (args[2].Solve(scope) != 0)
-					{
-						return 1;
-					}
+					return 1;
 				}
 			}
 
 			return 0;
-		}, "Enumerates through the list at the pointer represented by its first argument until the given expression doesn't evaluate to 0, or until the end of the list is found, assigning each value found to the assignable node represented by its second argument. If there are three arguments, $name evaluates the expression represented by its third argument for each element of the list. Otherwise, $name assigns the index of each value found to the assignable node represented by the second argument, and evaluates the expression represented by its fourth argument for each element of the list. Finally, $name returns 1 if an element matching the expression was found, and 0 otherwise."),
+		}, "Enumerates through the list at the pointer represented by its first argument, calling the lambda represented by its second argument on each element. The lambda is called with its first argument being the element found, and its second argument being the index of that element. Finally, $name returns 1 if the lambda ever returned a value other than 0, and returns 0 otherwise."),
 		new("count", (args, scope) =>
 		{
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"count\" requires a pointer node as its first argument.", scope);
-			IAssignable lambdaVar = args[1] as IAssignable ?? throw new WingCalcException("Function \"count\" requires an assignable node as its second argument.", scope);
+			ICallable lambda = args[1] as ICallable ?? throw new WingCalcException("Function \"count\" requires a callable node as its second argument.", scope);
 
 			int count = 0;
 
-			if (args.Count >= 4)
+			foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
 			{
-				IAssignable indexVar = args[2] as IAssignable ?? throw new WingCalcException("Function \"count\" requires an assignable node as its third argument.", scope);
-				foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
+				if (lambda.Call(scope, new(new List<INode>() { new ConstantNode(x), new ConstantNode(i) })) != 0)
 				{
-					lambdaVar.Assign(x, scope);
-					indexVar.Assign(i, scope);
-
-					if (args[3].Solve(scope) != 0)
-					{
-						count++;
-					}
-				}
-			}
-			else
-			{
-				foreach (double x in ListHandler.Enumerate(pointer, scope))
-				{
-					lambdaVar.Assign(x, scope);
-
-					if (args[2].Solve(scope) != 0)
-					{
-						count++;
-					}
+					count++;
 				}
 			}
 
 			return count;
-		}, "Enumerates through the list at the pointer represented by its first argument, assigning each value found to the assignable node represented by its second argument. If there are three arguments, $name evaluates the expression represented by its third argument for each element of the list. Otherwise, $name assigns the index of each value found to the assignable node represented by the second argument, and evaluates the expression represented by its fourth argument for each element of the list. For each element in the list, if the expression evaluated to 0, that element is removed from the list. Finally, $name returns the number of elements in the list for which the expression did not evaluate to 0."),
+		}, "Enumerates through the list at the pointer represented by its first argument, calling the lambda represented by its second argument on each element. The lambda is called with its first argument being the element found, and its second argument being the index of that element. Finally, $name returns the number of elements in the list for which the lambda did not evaluate to 0."),
 		#endregion
 
 		#region ControlFlow
