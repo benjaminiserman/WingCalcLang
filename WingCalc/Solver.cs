@@ -522,6 +522,7 @@ public class Solver
 	private List<INode> CreateParams(Span<Token> tokens, bool isLambda = false)
 	{
 		List<INode> nodes = new();
+		if (tokens.Length == 0) return nodes;
 		int next = 0;
 
 		int level = 1;

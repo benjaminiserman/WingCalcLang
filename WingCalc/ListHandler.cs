@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using WingCalc.Nodes;
+using static System.Formats.Asn1.AsnWriter;
 
 internal static class ListHandler
 {
@@ -16,20 +18,6 @@ internal static class ListHandler
 		{
 			pointer.Set((address + i).ToString(), values[i - 1], scope);
 		}
-
-		return address;
-	}
-
-	public static double StringAllocate(IPointer pointer, IList<double> values, Scope scope)
-	{
-		double address = pointer.Address(scope);
-
-		for (int i = 0; i < values.Count; i++)
-		{
-			pointer.Set((address + i).ToString(), values[i], scope);
-		}
-
-		pointer.Set((address + values.Count).ToString(), 0, scope);
 
 		return address;
 	}
@@ -93,10 +81,6 @@ internal static class ListHandler
 
 	public static double Setify(IPointer a, Scope scope) => Allocate(a, Enumerate(a, scope).ToHashSet().ToList(), scope);
 
-	public static double Listify(IPointer a, Scope scope) => Allocate(a, StringEnumerate(a, scope).ToList(), scope);
-
-	public static double Stringify(IPointer a, Scope scope) => StringAllocate(a, Enumerate(a, scope).ToList(), scope);
-
 	public static IEnumerable<double> Enumerate(IPointer pointer, Scope scope)
 	{
 		double address = pointer.Address(scope);
@@ -106,18 +90,6 @@ internal static class ListHandler
 		for (int i = 1; i <= length; i++)
 		{
 			yield return pointer.Get((address + i).ToString(), scope);
-		}
-	}
-
-	public static IEnumerable<double> StringEnumerate(IPointer pointer, Scope scope)
-	{
-		double address = pointer.Address(scope);
-
-		for (int i = 0; true; i++)
-		{
-			double x = pointer.Get((address + i).ToString(), scope);
-			if (x == 0) yield break;
-			else yield return x;
 		}
 	}
 
@@ -143,7 +115,9 @@ internal static class ListHandler
 		else return func(args.Select(x => x.Solve(scope)));
 	}
 
-	public static string GetString(this IEnumerable<double> list) => $"{{ {string.Join(", ", list)} }}";
+	public static string GetArrayString(this IEnumerable<double> list) => $"{{ {string.Join(", ", list)} }}";
+
+	public static string GetTextString(this IEnumerable<double> list) => new(list.Select(x => (char)x).ToArray());
 
 	public static string SolveDocumentation => "Given a list represented by either its first argument as a pointer, or by all of its arguments evaluated as doubles, ";
 }

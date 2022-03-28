@@ -223,7 +223,7 @@ internal static class Functions
 				if (args.Count == 1)
 				{
 					modes = ListHandler.Enumerate(pointer, scope).Mode();
-					scope.Solver.WriteLine(modes.GetString());
+					scope.Solver.WriteLine(ListHandler.GetArrayString(modes));
 				}
 				else if (args[1] is IPointer second)
 				{
@@ -239,7 +239,7 @@ internal static class Functions
 			else
 			{
 				modes = args.Select(x => x.Solve(scope)).Mode();
-				scope.Solver.WriteLine(modes.GetString());
+				scope.Solver.WriteLine(ListHandler.GetArrayString(modes));
 			}
 
 			return modes.Count();
@@ -585,7 +585,7 @@ internal static class Functions
 		{
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"print\" requires a pointer node as its first argument.", scope);
 
-			scope.Solver.WriteLine(ListHandler.Enumerate(pointer, scope).GetString());
+			scope.Solver.WriteLine(ListHandler.GetArrayString(ListHandler.Enumerate(pointer, scope)));
 
 			return ListHandler.Length(pointer, scope);
 		}, "Given its first argument as a pointer, $name enumerates the list found at the pointer and prints each element within it to standard out. Finally, $name returns the number of values printed."),
@@ -753,7 +753,7 @@ internal static class Functions
 			}
 			else if (args[0] is IPointer pointer)
 			{
-				string text = new(ListHandler.Enumerate(pointer, scope).Select(x => (char)x).ToArray());
+				string text = ListHandler.GetTextString(ListHandler.Enumerate(pointer, scope));
 				scope.Solver.Write(text);
 
 				return text.Length;
@@ -773,7 +773,7 @@ internal static class Functions
 			}
 			else if (args[0] is IPointer pointer)
 			{
-				string text = new(ListHandler.Enumerate(pointer, scope).Select(x => (char)x).ToArray());
+				string text = ListHandler.GetTextString(ListHandler.Enumerate(pointer, scope));
 				scope.Solver.WriteLine(text);
 
 				return text.Length;
@@ -796,6 +796,31 @@ internal static class Functions
 			scope.Solver.Flush();
 			return 1;
 		}, "Flushes any buffered data from standard output and returns 1."),
+		#endregion
+
+		#region Services
+		new("oeis", (args, scope) => ListHandler.Solve(args, list =>
+		{
+			scope.Solver.WriteLine($"https://oeis.org/search?q={string.Join("%2C+", list.Select(x => Math.Truncate(x)))}");
+			return 1;
+		}, scope), ListHandler.SolveDocumentation + "$name prints to standard output a link to the OEIS lookup for the list."),
+		new("wolfram", (args, scope) =>
+		{
+			if (args[0] is IPointer pointer)
+			{
+				scope.Solver.WriteLine($"https://www.wolframalpha.com/input?i={System.Web.HttpUtility.UrlEncode(ListHandler.GetTextString(ListHandler.Enumerate(pointer, scope)))}");
+			}
+			else if (args[0] is QuoteNode quote)
+			{
+				scope.Solver.WriteLine($"https://www.wolframalpha.com/input?i={System.Web.HttpUtility.UrlEncode(quote.Text)}");
+			}
+			else
+			{
+				throw new WingCalcException("Function \"wolfram\" requires a pointer node or a quote node as its first argument.", scope);
+			}
+
+			return 1;
+		}, "Given its first argument as a pointer, $name prints to standard output a link to a Wolfram Alpha search for the string represented by that pointer. Finally, $name returns 1."),
 		#endregion
 
 		#region Meta
