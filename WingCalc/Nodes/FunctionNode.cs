@@ -7,7 +7,6 @@ internal record FunctionNode(string Name, LocalList Locals) : INode
 {
 	public double Solve(Scope scope)
 	{
-		//scope.Solver.PushCallStack(Locals);
 		List<INode> Nodes = (List<INode>)Locals;
 
 		try
@@ -29,10 +28,6 @@ internal record FunctionNode(string Name, LocalList Locals) : INode
 		catch (KeyNotFoundException)
 		{
 			throw new WingCalcException($"Function \"{Name}\" does not exist.", scope);
-		}
-		finally
-		{
-			//scope.Solver.PopCallStack();
 		}
 	}
 }

@@ -43,8 +43,8 @@ internal static class Operators
 		new("+", (a, b) => new BinaryNode(a, b, _operations["+"]), _precedenceTiers["additive"], "Computes the sum of its operands."),
 		new("-", (a, b) => new BinaryNode(a, b, _operations["-"]), _precedenceTiers["additive"], "Computes its left-hand operand minus its right-hand operand."),
 
-		new("<<", (a, b) => new BinaryNode(a, b, (x, y) => (int)x << (int)y), _precedenceTiers["shift"], "Converts its operands to integers and computes the left bit shift of its left-hand operator by its right-hand operator."),
-		new(">>", (a, b) => new BinaryNode(a, b, (x, y) => (int)x >> (int)y), _precedenceTiers["shift"], "Converts its operands to integers and computes the right bit shift of its left-hand operator by its right-hand operator."),
+		new("<<", (a, b) => new BinaryNode(a, b, (x, y) => (long)x * (int)Math.Pow(2, (int)y)), _precedenceTiers["shift"], "Converts its operands to integers and computes the left bit shift of its left-hand operator by its right-hand operator."),
+		new(">>", (a, b) => new BinaryNode(a, b, (x, y) => (long)x / (int)Math.Pow(2, (int)y)), _precedenceTiers["shift"], "Converts its operands to integers and computes the right bit shift of its left-hand operator by its right-hand operator."),
 
 		new("<", (a, b) => new BinaryNode(a, b, (x, y) => x < y ? 1 : 0), _precedenceTiers["relational"], "Returns 1 if its left-hand operand is less than its right-hand operand and otherwise returns 0."),
 		new(">", (a, b) => new BinaryNode(a, b, (x, y) => x > y ? 1 : 0), _precedenceTiers["relational"], "Returns 1 if its left-hand operand is greater than its right-hand operand and otherwise returns 0."),
@@ -78,6 +78,7 @@ internal static class Operators
 		new("&=", (a, b) => new CompoundAssignmentNode((IAssignable)a, "&", b), _precedenceTiers["assignment"], "Computes the & of its operands, and assigns that value to its left-hand operand and returns it."),
 		new("^=", (a, b) => new CompoundAssignmentNode((IAssignable)a, "^", b), _precedenceTiers["assignment"], "Computes the ^ of its operands, and assigns that value to its left-hand operand and returns it."),
 		new("|=", (a, b) => new CompoundAssignmentNode((IAssignable)a, "|", b), _precedenceTiers["assignment"], "Computes the | of its operands, and assigns that value to its left-hand operand and returns it."),
+		new(";=", (a, b) => new CompoundAssignmentNode((IAssignable)a, ";", b), _precedenceTiers["assignment"], "Computes the ; of its operands, and assigns that value to its left-hand operand and returns it."),
 
 		new("?=", (a, b) => new ElvisAssignmentNode((IAssignable)a, b), _precedenceTiers["assignment"], "Computes the ?: of its operands, and assigns that value to its left-hand operand and returns it."),
 		new("=", (a, b) => new AssignmentNode((IAssignable)a, b), _precedenceTiers["assignment"], "Assigns its right-hand operand to its left-hand operand."),
@@ -140,6 +141,8 @@ internal static class Operators
 			throw new WingCalcException($"\"{symbol}\" is not a valid binary operator.");
 		}
 	}
+
+	public static bool IsBinary(string symbol) => _operators.ContainsKey(symbol);
 
 	public static Func<double, double, double> GetOperatorFunction(string symbol) => _operations[symbol];
 
