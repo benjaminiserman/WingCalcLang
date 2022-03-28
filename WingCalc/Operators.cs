@@ -43,8 +43,8 @@ internal static class Operators
 		new("+", (a, b) => new BinaryNode(a, b, _operations["+"]), _precedenceTiers["additive"], "Computes the sum of its operands."),
 		new("-", (a, b) => new BinaryNode(a, b, _operations["-"]), _precedenceTiers["additive"], "Computes its left-hand operand minus its right-hand operand."),
 
-		new("<<", (a, b) => new BinaryNode(a, b, (x, y) => (int)x << (int)y), _precedenceTiers["shift"], "Converts its operands to integers and computes the left bit shift of its left-hand operator by its right-hand operator."),
-		new(">>", (a, b) => new BinaryNode(a, b, (x, y) => (int)x >> (int)y), _precedenceTiers["shift"], "Converts its operands to integers and computes the right bit shift of its left-hand operator by its right-hand operator."),
+		new("<<", (a, b) => new BinaryNode(a, b, (x, y) => (long)x * (int)Math.Pow(2, (int)y)), _precedenceTiers["shift"], "Converts its operands to integers and computes the left bit shift of its left-hand operator by its right-hand operator."),
+		new(">>", (a, b) => new BinaryNode(a, b, (x, y) => (long)x / (int)Math.Pow(2, (int)y)), _precedenceTiers["shift"], "Converts its operands to integers and computes the right bit shift of its left-hand operator by its right-hand operator."),
 
 		new("<", (a, b) => new BinaryNode(a, b, (x, y) => x < y ? 1 : 0), _precedenceTiers["relational"], "Returns 1 if its left-hand operand is less than its right-hand operand and otherwise returns 0."),
 		new(">", (a, b) => new BinaryNode(a, b, (x, y) => x > y ? 1 : 0), _precedenceTiers["relational"], "Returns 1 if its left-hand operand is greater than its right-hand operand and otherwise returns 0."),
