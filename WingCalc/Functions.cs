@@ -590,6 +590,43 @@ internal static class Functions
 
 		#region Strings
 		new("exec", (args, scope) => scope.Solver.Solve(ListHandler.PointerOrString(args[0], scope)), "Given its first argument as a pointer, $name reads the list at that pointer as a string and executes it as a WingCalc expression. Or, given its first argument as a quote, $name executes the text of the quote as a WingCalc expression."),
+		new("regexcount", (args, scope) => System.Text.RegularExpressions.Regex.Matches(ListHandler.PointerOrString(args[0], scope), ListHandler.PointerOrString(args[1], scope)).Count, "Given two strings as either quotes or pointers, $name interprets the first argument as an input string and the second argument as a regular expression. Then, $name returns the number of time thes regular expression was found within the input string."),
+		new("regex", (args, scope) =>
+		{
+			string s = System.Text.RegularExpressions.Regex.Matches(ListHandler.PointerOrString(args[0], scope), ListHandler.PointerOrString(args[1], scope))[(int)args[2].Solve(scope)].Value;
+
+			if (args.Count == 3)
+			{
+				scope.Solver.WriteLine(s);
+			}
+			else
+			{
+				IPointer pointer = args[3] as IPointer ?? throw new WingCalcException("Function \"regex\" requires a pointer node as its fpurth argument.", scope);
+
+				ListHandler.Allocate(pointer, s.Select(c => (double)c).ToList(), scope);
+			}
+
+			return s.Length;
+		}, "Given two strings as either quotes or pointers, $name interprets the first argument as an input string and the second argument as a regular expression. Then, from the matches found, $name gets the match with an index equal to its third argument. If there are only three arguments, $name then writes the matching string to standard out. Otherwise, $name interprets its fourth argument as a pointer and allocates the matching string to that pointer. Finally, $name returns the length of the chosen matching string."),
+		new("regexreplace", (args, scope) =>
+		{
+			string s = System.Text.RegularExpressions.Regex.Replace(ListHandler.PointerOrString(args[0], scope), ListHandler.PointerOrString(args[1], scope), ListHandler.PointerOrString(args[2], scope));
+
+			if (args.Count == 3)
+			{
+				scope.Solver.WriteLine(s);
+			}
+			else
+			{
+				IPointer pointer = args[3] as IPointer ?? throw new WingCalcException("Function \"regexreplace\" requires a pointer node as its fpurth argument.", scope);
+
+				ListHandler.Allocate(pointer, s.Select(c => (double)c).ToList(), scope);
+			}
+
+			return s.Length;
+		}, "Given two strings as either quotes or pointers, $name interprets the first argument as an input string and the second argument as a regular expression. Then, for each match found, $name replaces the match with the string represented by its third argument as a pointer or quote. If there are only three arguments, $name then writes the matching string to standard out. Otherwise, $name interprets its fourth argument as a pointer and allocates the matching string to that pointer. Finally, $name returns the length of the final string."),
+
+
 		#endregion
 
 		#region Factors
