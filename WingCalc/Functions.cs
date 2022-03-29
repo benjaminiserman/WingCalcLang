@@ -664,6 +664,16 @@ internal static class Functions
 
 			return assignable.DeepAssign(args[1].Solve(scope), scope);
 		}, "Recursively finds the deepest assignable node within its first argument and sets it to its second argument evaluated."),
+		new("enum", (args, scope) =>
+		{
+			for (int i = 0; i < args.Count; i++)
+			{
+				IAssignable assignable = args[i] as IAssignable ?? throw new WingCalcException($"All arugments of the \"enum\" function must be assignable.");
+				assignable.Assign(i, scope);
+			}
+
+			return 1;
+		}, "Assigns to each argument its index within the argument list. Finally, $name returns 1."),
 		#endregion
 
 		#region ExceptionHandling
