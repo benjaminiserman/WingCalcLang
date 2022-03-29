@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using WingCalc.Exceptions;
 using WingCalc.Nodes;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -118,6 +120,24 @@ internal static class ListHandler
 	public static string GetArrayString(this IEnumerable<double> list) => $"{{ {string.Join(", ", list)} }}";
 
 	public static string GetTextString(this IEnumerable<double> list) => new(list.Select(x => (char)x).ToArray());
+
+	public static string PointerOrString(INode n, Scope scope)
+	{
+		if (n is IPointer pointer)
+		{
+			StringBuilder sb = new();
+			foreach (double x in Enumerate(pointer, scope)) sb.Append((char)x);
+			return sb.ToString();
+		}
+		else if (n is QuoteNode quote)
+		{
+			return quote.Text;
+		}
+		else
+		{
+			throw new WingCalcException("A pointer node or a quote node was expected.", scope);
+		}
+	}
 
 	public static string SolveDocumentation => "Given a list represented by either its first argument as a pointer, or by all of its arguments evaluated as doubles, ";
 }

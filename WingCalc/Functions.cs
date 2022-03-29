@@ -581,34 +581,15 @@ internal static class Functions
 			solver.WriteLine($"${address} = {value}");
 			return value;
 		}, "Given its first argument as a pointer, $name prints the address of the pointer and the value at the pointer to standard output. Finally, $name returns the value at the pointer."),
-		new("print", (args, scope) =>
+		new("print", (args, scope) => ListHandler.Solve(args, list =>
 		{
-			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"print\" requires a pointer node as its first argument.", scope);
-
-			scope.Solver.WriteLine(ListHandler.GetArrayString(ListHandler.Enumerate(pointer, scope)));
-
-			return ListHandler.Length(pointer, scope);
-		}, "Given its first argument as a pointer, $name enumerates the list found at the pointer and prints each element within it to standard out. Finally, $name returns the number of values printed."),
+			scope.Solver.WriteLine(ListHandler.GetArrayString(list));
+			return list.Count();
+		}, scope), ListHandler.SolveDocumentation + "$name enumerates the list and prints each element within it to standard out. Finally, $name returns the number of values printed."),
 		#endregion
 
 		#region Strings
-		new("exec", (args, scope) =>
-		{
-			if (args[0] is IPointer pointer)
-			{
-				StringBuilder sb = new();
-				foreach (double x in ListHandler.Enumerate(pointer, scope)) sb.Append((char)x);
-				return scope.Solver.Solve(sb.ToString());
-			}
-			else if (args[0] is QuoteNode quote)
-			{
-				return scope.Solver.Solve(quote.Text);
-			}
-			else
-			{
-				throw new WingCalcException("Function \"exec\" requires a pointer node or a quote node as its first argument.", scope);
-			}
-		}, "Given its first argument as a pointer, $name reads the list at that pointer as a string and executes it as a WingCalc expression. Or, given its first argument as a quote, $name executes the text of the quote as a WingCalc expression."),
+		new("exec", (args, scope) => scope.Solver.Solve(ListHandler.PointerOrString(args[0], scope)), "Given its first argument as a pointer, $name reads the list at that pointer as a string and executes it as a WingCalc expression. Or, given its first argument as a quote, $name executes the text of the quote as a WingCalc expression."),
 		#endregion
 
 		#region Factors
