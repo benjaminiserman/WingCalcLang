@@ -713,7 +713,7 @@ internal static class Functions
 			}
 
 			return xySum / Math.Sqrt(xSum * ySum);
-		}, ""),
+		}, "Given a pointer y and a pointer x, $name calculates the Pearson correlation coefficient of the lists represented by the two pointers."),
 		#endregion
 
 		#region Programming
