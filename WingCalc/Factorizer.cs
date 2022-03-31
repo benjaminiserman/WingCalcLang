@@ -73,5 +73,18 @@ internal static class Factorizer
 		return list;
 	}
 
+	public static int Totient(BigInteger n)
+	{
+		int count = 0;
+		for (int i = 1; i < n; i++)
+		{
+			if (GCD(n, i) == 1)
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+
 	public static bool IsPrime(BigInteger x) => (Factors(x)?.Count ?? 0) == 2;
 }

@@ -671,6 +671,18 @@ internal static class Functions
 
 			return factors.Count;
 		}, "If there is only one argument, $name prints to standard output the prime factorization of its first argument. Otherwise, $name creates a list at the pointer represented by its first argument and fills it with the prime factorization of its second argument."),
+		new("totient", (args, scope) => Factorizer.Totient((int)args[0].Solve(scope)), "Given its first argument truncated to an integer, $name returns the number of natural numbers below its first argument that are relatively prime to the first argument."),
+		new("invmod", (args, scope) =>
+		{
+			int a = (int)args[0].Solve(scope);
+			int m = (int)args[1].Solve(scope);
+
+			if (Factorizer.GCD(a, m) == 1)
+			{
+				return (double)BigInteger.ModPow(a, Factorizer.Totient(m) - 1, m);
+			}
+			else return -1;
+		}, "Given two integers, $name returns the modular multiplicative inverse of its first argument modulo its second argument. If an inverse cannot be found, $name returns -1."),
 		#endregion
 
 		#region Programming
