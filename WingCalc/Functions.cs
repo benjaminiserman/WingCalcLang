@@ -685,6 +685,37 @@ internal static class Functions
 		}, "Given two integers, $name returns the modular multiplicative inverse of its first argument modulo its second argument. If an inverse cannot be found, $name returns -1."),
 		#endregion
 
+		#region Statistics
+		new("correl", (args, scope) =>
+		{
+			IPointer y = args[0] as IPointer ?? throw new WingCalcException("The first argument of the \"correl\" function must be a pointer.", scope);
+			IPointer x = args[1] as IPointer ?? throw new WingCalcException("The first argument of the \"correl\" function must be a pointer.", scope);
+
+			int count = ListHandler.Enumerate(x, scope).Count();
+			if (count != ListHandler.Enumerate(y, scope).Count())
+			{
+				throw new WingCalcException("The two list arguments of \"correl\" must have the same length.", scope);
+			}
+
+			double xMean = ListHandler.Enumerate(x, scope).Average();
+			double yMean = ListHandler.Enumerate(y, scope).Average();
+
+			double xSum = 0, ySum = 0, xySum = 0;
+
+			for (double i = 0; i < count; i++)
+			{
+				double a = ListHandler.Get(x, i, scope);
+				double b = ListHandler.Get(y, i, scope);
+
+				xySum += (a - xMean) * (b - yMean);
+				xSum += Math.Pow(a - xMean, 2);
+				ySum += Math.Pow(b - yMean, 2);
+			}
+
+			return xySum / Math.Sqrt(xSum * ySum);
+		}, ""),
+		#endregion
+
 		#region Programming
 		new("eval", (args, scope) => args[0].Solve(scope), "Evaluates and returns its first argument."),
 		new("call", (args, scope) =>
