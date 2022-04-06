@@ -625,8 +625,55 @@ internal static class Functions
 
 			return s.Length;
 		}, "Given two strings as either quotes or pointers, $name interprets the first argument as an input string and the second argument as a regular expression. Then, for each match found, $name replaces the match with the string represented by its third argument as a pointer or quote. If there are only three arguments, $name then writes the matching string to standard out. Otherwise, $name interprets its fourth argument as a pointer and allocates the matching string to that pointer. Finally, $name returns the length of the final string."),
+		new("parse", (args, scope) => double.Parse(ListHandler.PointerOrString(args[0], scope)), "Given a quote or pointer, $name interprets its first argument as a string and parses it to a double."),
+		new("split", (args, scope) =>
+		{
+			// string, pointer, lambda
+			// string, string, pointer, lambda
+			// string, pointer, int
+			// string, string, pointer, int
 
+			string s = ListHandler.PointerOrString(args[0], scope) ?? throw new WingCalcException("Function \"split\" requres a pointer or quote as its first argument.", scope);
 
+			bool isLambda = args[2] is IPointer
+				? args[3] is ICallable
+				: args[2] is ICallable;
+
+			IPointer pointer;
+
+			if (args[2] is IPointer) pointer = args[2] as IPointer;
+			else if (args[1] is IPointer) pointer = args[1] as IPointer;
+			else throw new WingCalcException("Function \"split\" requires a pointer argument.");
+
+			string split = null;
+			if (args[2] is IPointer) split = ListHandler.PointerOrString(args[1], scope) ?? throw new WingCalcException("Function \"split\" requres a pointer or quote as its second argument.", scope);
+
+			if (isLambda)
+			{
+				ICallable lambda = args[3] as ICallable ?? args[2] as ICallable;
+				if (split == null)
+				{
+					return ListHandler.Allocate(pointer, s.Split().Select(x => lambda.Call(scope, new(new List<INode>() { new QuoteNode(x) }))).ToList(), scope);
+				}
+				else
+				{
+					return ListHandler.Allocate(pointer, s.Split(split).Select(x => lambda.Call(scope, new(new List<INode>() { new QuoteNode(x) }))).ToList(), scope);
+				}
+			}
+			else
+			{
+				int index = args.Count >= 4 ? (int)args[3].Solve(scope) : (int)args[2].Solve(scope);
+
+				if (split == null)
+				{
+					return ListHandler.Allocate(pointer, s.Split()[index].Select(x => (double)x).ToList(), scope);
+				}
+				else
+				{
+					return ListHandler.Allocate(pointer, s.Split(split)[index].Select(x => (double)x).ToList(), scope);
+				}
+			}
+		}, "Given a string, a second string (optional), a pointer, and an expression, $name splits the first string on the second string (or white space if none is provided) into a list and allocates the element of the list with an index equal to the evaluated expession to the provided pointer. Finally, $name returns the address of the pointer. Note: there's also overrides using lambdas, but I don't remember why I added them so I'm not documenting it right now."),
 		#endregion
 
 		#region Factors
