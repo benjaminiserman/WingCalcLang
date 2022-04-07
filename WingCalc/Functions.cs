@@ -983,6 +983,89 @@ internal static class Functions
 		}, "Prints WingCalc's version number to standard output, then returns the major version number."),
 		#endregion
 
+		#region DateTime
+		new("date", (args, scope) =>
+		{
+			if (args[0] is IPointer or QuoteNode)
+			{
+				string s = ListHandler.PointerOrString(args[0], scope);
+
+				return DateTime.Parse(s).Ticks / 1e7;
+			}
+			else
+			{
+				double x = args[0].Solve(scope);
+				string s = new DateTime((long)x * (long)1e7).ToString();
+
+				if (args.Count > 1 && args[1] is IPointer pointer)
+				{
+					ListHandler.Allocate(pointer, s.Select(c => (double)c).ToList(), scope);
+				}
+				else
+				{
+					scope.Solver.WriteLine(s);
+				}
+
+				return x;
+			}
+		}, "If given a pointer or string as its first argument, $name returns the numeric timestamp for the date represented by that string. Otherwise, $name creates a human-readable date string from its first argument. If it has a second argument and it is a pointer, $name will allocate the date string to that pointer and return the given timestamp. Otherwise, $name will print the date string to standard output and return the given timestamp. "),
+		new("second", (args, scope) => new DateTime((long)args[0].Solve(scope) * (long)1e7).Second, "Given a timestamp, $name returns the seconds component of the given timestamp."),
+		new("minute", (args, scope) => new DateTime((long)args[0].Solve(scope) * (long)1e7).Minute, "Given a timestamp, $name returns the minutes component of the given timestamp."),
+		new("hour", (args, scope) => new DateTime((long)args[0].Solve(scope) * (long)1e7).Hour, "Given a timestamp, $name returns the hours component of the given timestamp."),
+		new("day", (args, scope) => new DateTime((long)args[0].Solve(scope) * (long)1e7).Day, "Given a timestamp, $name returns the days component of the given timestamp."),
+		new("month", (args, scope) => new DateTime((long)args[0].Solve(scope) * (long)1e7).Month, "Given a timestamp, $name returns the months component of the given timestamp."),
+		new("year", (args, scope) => new DateTime((long)args[0].Solve(scope) * (long)1e7).Year, "Given a timestamp, $name returns the years component of the given timestamp."),
+		new("weekdaynum", (args, scope) => (int)new DateTime((long)args[0].Solve(scope) * (long)1e7).DayOfWeek, "Given a timestamp, $name returns the numeric day of the week the timestamp lies on. (0 = Sunday)"),
+		new("now", (args, scope) => DateTime.Now.Ticks / 1e7, "Returns the timestamp for right now according to the current timezone."),
+		new("utcnow", (args, scope) => DateTime.UtcNow.Ticks / 1e7, "Returns the timestamp for right now in the UTC timezone."),
+		new("today", (args, scope) => DateTime.Today.Ticks / 1e7, "Returns the timestamp for 12AM today."),
+		new("yesterday", (args, scope) => DateTime.Today.AddDays(-1).Ticks / 1e7, "Returns the timestamp for 12AM yesterday."),
+		new("tomorrow", (args, scope) => DateTime.Today.AddDays(1).Ticks / 1e7, "Returns the timestamp for 12AM tomorrow."),
+		new("overmorrow", (args, scope) => DateTime.Today.AddDays(2).Ticks / 1e7, "Returns the timestamp for 12AM two days from now."),
+		new("unixtime", (args, scope) => new DateTimeOffset(new DateTime((long)args[0].Solve(scope) * (long)1e7)).ToUnixTimeSeconds(), "Given a timestamp, $name returns the days component of the given timestamp."),
+		new("unixtimems", (args, scope) => new DateTimeOffset(new DateTime((long)args[0].Solve(scope) * (long)1e7)).ToUnixTimeMilliseconds(), ""),
+		new("weekday", (args, scope) =>
+		{
+			double x = args[0].Solve(scope);
+			string s;
+			int ret = 0;
+
+			if (x % 1.0 == 0 && 0 <= x && x <= 6)
+			{
+				s = x switch
+				{
+					0 => "Sunday",
+					1 => "Monday",
+					2 => "Tuesday",
+					3 => "Wednesday",
+					4 => "Thursday",
+					5 => "Friday",
+					6 => "Saturday",
+					_ => throw new WingCalcException($"This error should not be possible. Show it to a dev. #{x}", scope)
+				};
+
+				ret = (int)x;
+			}
+			else
+			{
+				var date = new DateTime((long)args[0].Solve(scope) * (long)1e7);
+				s = date.DayOfWeek.ToString();
+				ret = (int)date.DayOfWeek;
+			}
+
+			if (args.Count > 1 && args[1] is IPointer pointer)
+			{
+				ListHandler.Allocate(pointer, s.Select(c => (double)c).ToList(), scope);
+				return ret;
+			}
+			else
+			{
+				scope.Solver.WriteLine(s);
+				return ret;
+			}
+		}, "Given a timestamp or a numeric day of the week, $name returns the numeric day of the week of the timestamp. If it has a second argument and it is a pointer, $name allocates the English word for that day of the week to that pointer. Otherwise, $name prints the English word for the day of the week to standard output."),
+		#endregion
+
 	}.ToDictionary(x => x.Name, x => x);
 
 	internal static Function Get(string s) => _functions[s].Function;
