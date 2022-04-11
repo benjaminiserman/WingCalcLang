@@ -1066,6 +1066,15 @@ internal static class Functions
 		}, "Given a timestamp or a numeric day of the week, $name returns the numeric day of the week of the timestamp. If it has a second argument and it is a pointer, $name allocates the English word for that day of the week to that pointer. Otherwise, $name prints the English word for the day of the week to standard output."),
 		#endregion
 
+		#region Temperature
+		new("ctof", (args, scope) => args[0].Solve(scope) * 9.0/5.0 + 32, "Takes a temperature in celsius and returns it converted to fahrenheit."),
+		new("ftoc", (args, scope) => (args[0].Solve(scope) - 32) * 5.0/9.0, "Takes a temperature in fahrenheit and returns it converted to celsius."),
+		new("ctok", (args, scope) => args[0].Solve(scope) + 273.15, "Takes a temperature in celsius and returns it converted to kelvin."),
+		new("ktoc", (args, scope) => args[0].Solve(scope) - 273.15, "Takes a temperature in kelvin and returns it converted to celsius."),
+		new("ftok", (args, scope) => (args[0].Solve(scope) - 32) * 5.0/9.0 + 273.15, "Takes a temperature in fahrenheit and returns it converted to kelvin."),
+		new("ktof", (args, scope) => (args[0].Solve(scope) - 273.15) * 9.0/5.0 + 32, "Takes a temperature in kelvin and returns it converted to fahrenheit."),
+		#endregion
+
 	}.ToDictionary(x => x.Name, x => x);
 
 	internal static Function Get(string s) => _functions[s].Function;

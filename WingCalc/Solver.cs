@@ -13,6 +13,9 @@ public class Solver
 		["PI"] = Math.PI,
 		["TAU"] = Math.Tau,
 		["E"] = Math.E,
+		["C"] = 299_792_458,
+		["H"] = 6.626_070_15e-34,
+		["AVOGADRO"] = 6.022_140_76e23,
 
 		["BYTEMIN"] = byte.MinValue,
 		["BYTEMAX"] = byte.MaxValue,
@@ -46,8 +49,14 @@ public class Solver
 		["EXACT"] = 5,
 		["OCT"] = 8,
 		["HEX"] = 16,
-		
-		["SECOND"] = new DateTime(0).AddSeconds(1).Ticks / 1e7,
+
+		#region TIME
+
+		["MIN"] = new DateTime(0).AddMinutes(1).Ticks / 1e7,
+		["HR"] = new DateTime(0).AddHours(1).Ticks / 1e7,
+		["WK"] = new DateTime(0).AddDays(7).Ticks / 1e7,
+		["YR"] = new DateTime(0).AddYears(1).Ticks / 1e7,
+
 		["MINUTE"] = new DateTime(0).AddMinutes(1).Ticks / 1e7,
 		["HOUR"] = new DateTime(0).AddHours(1).Ticks / 1e7,
 		["DAY"] = new DateTime(0).AddDays(1).Ticks / 1e7,
@@ -60,7 +69,6 @@ public class Solver
 		["CENTURY"] = new DateTime(0).AddYears(100).Ticks / 1e7,
 		["MILLENIUM"] = new DateTime(0).AddYears(1000).Ticks / 1e7,
 
-		["SECONDS"] = new DateTime(0).AddSeconds(1).Ticks / 1e7,
 		["MINUTES"] = new DateTime(0).AddMinutes(1).Ticks / 1e7,
 		["HOURS"] = new DateTime(0).AddHours(1).Ticks / 1e7,
 		["DAYS"] = new DateTime(0).AddDays(1).Ticks / 1e7,
@@ -75,10 +83,179 @@ public class Solver
 
 		["SCORE"] = 20,
 
+		#endregion
+
+		#region DATA
+		["BIT"] = 1.0/8.0,
+
+		["KILOBIT"] = 1e3 * 1.0/8.0,
+		["MEGABIT"] = 1e6 * 1.0/8.0,
+		["GIGABIT"] = 1e9 * 1.0/8.0,
+		["TERABIT"] = 1e12 * 1.0/8.0,
+		["PETABIT"] = 1e15 * 1.0/8.0,
+		["EXABIT"] = 1e18 * 1.0/8.0,
+		["ZETTABIT"] = 1e21 * 1.0/8.0,
+		["YOTTABIT"] = 1e24 * 1.0/8.0,
+
+		["KBIT"] = 1e3 * 1.0/8.0,
+		["MBIT"] = 1e6 * 1.0/8.0,
+		["GBIT"] = 1e9 * 1.0/8.0,
+		["TBIT"] = 1e12 * 1.0/8.0,
+		["PBIT"] = 1e15 * 1.0/8.0,
+		["EBIT"] = 1e18 * 1.0/8.0,
+		["ZBIT"] = 1e21 * 1.0/8.0,
+		["YBIT"] = 1e24 * 1.0/8.0,
+
+		["KIBIBIT"] = Math.Pow(2 * 1.0/8.0, 10) * 1.0/8.0,
+		["MEBIBIT"] = Math.Pow(2 * 1.0/8.0, 20) * 1.0/8.0,
+		["GIBIBIT"] = Math.Pow(2 * 1.0/8.0, 30) * 1.0/8.0,
+		["TEBIBIT"] = Math.Pow(2 * 1.0/8.0, 40) * 1.0/8.0,
+		["PEBIBIT"] = Math.Pow(2 * 1.0/8.0, 50) * 1.0/8.0,
+		["EXBIBIT"] = Math.Pow(2 * 1.0/8.0, 60) * 1.0/8.0,
+		["ZEBIBIT"] = Math.Pow(2 * 1.0/8.0, 70) * 1.0/8.0,
+		["YOBIBIT"] = Math.Pow(2 * 1.0/8.0, 80) * 1.0/8.0,
+
+		["KIBIT"] = Math.Pow(2 * 1.0/8.0, 10) * 1.0/8.0,
+		["MIBIT"] = Math.Pow(2 * 1.0/8.0, 20) * 1.0/8.0,
+		["GIBIT"] = Math.Pow(2 * 1.0/8.0, 30) * 1.0/8.0,
+		["TIBIT"] = Math.Pow(2 * 1.0/8.0, 40) * 1.0/8.0,
+		["PIBIT"] = Math.Pow(2 * 1.0/8.0, 50) * 1.0/8.0,
+		["EIBIT"] = Math.Pow(2 * 1.0/8.0, 60) * 1.0/8.0,
+		["ZIBIT"] = Math.Pow(2 * 1.0/8.0, 70) * 1.0/8.0,
+		["YIBIT"] = Math.Pow(2 * 1.0/8.0, 80) * 1.0/8.0,
+
+		["CRUMB"] = 2.0/8.0,
+		["NIBBLE"] = 4.0/8.0,
+		["BYTE"] = 1,
+		["B"] = 1,
+
+		["KILOBYTE"] = 1e3,
+		["MEGABYTE"] = 1e6,
+		["GIGABYTE"] = 1e9,
+		["TERABYTE"] = 1e12,
+		["PETABYTE"] = 1e15,
+		["EXABYTE"] = 1e18,
+		["ZETTABYTE"] = 1e21,
+		["YOTTABYTE"] = 1e24,
+
+		["KB"] = 1e3,
+		["MB"] = 1e6,
+		["GB"] = 1e9,
+		["TB"] = 1e12,
+		["PB"] = 1e15,
+		["EB"] = 1e18,
+		["ZB"] = 1e21,
+		["YB"] = 1e24,
+
+		["KIBIBYTE"] = Math.Pow(2, 10),
+		["MEBIBYTE"] = Math.Pow(2, 20),
+		["GIBIBYTE"] = Math.Pow(2, 30),
+		["TEBIBYTE"] = Math.Pow(2, 40),
+		["PEBIBYTE"] = Math.Pow(2, 50),
+		["EXBIBYTE"] = Math.Pow(2, 60),
+		["ZEBIBYTE"] = Math.Pow(2, 70),
+		["YOBIBYTE"] = Math.Pow(2, 80),
+
+		["KIB"] = Math.Pow(2, 10),
+		["MIB"] = Math.Pow(2, 20),
+		["GIB"] = Math.Pow(2, 30),
+		["TIB"] = Math.Pow(2, 40),
+		["PIB"] = Math.Pow(2, 50),
+		["EIB"] = Math.Pow(2, 60),
+		["ZIB"] = Math.Pow(2, 70),
+		["YIB"] = Math.Pow(2, 80),
+
+		#endregion
+
+		#region OTHER_UNITS
+
+		["ASTRONOMICALUNIT"] = 149_597_970_700,
+		["AU"] = 149_597_970_700,
+		["LITER"] = 0.001,
+		["LITRE"] = 0.001,
+		["L"] = 0.001,
+		["GALLON"] = 3.785_411_784 * 0.001, // American Gallon
+		["GAL"] = 3.785_411_784 * 0.001,
+		["QUART"] = 3.785_411_784 * 0.001 * 1.0/4.0,
+		["QT"] = 3.785_411_784 * 0.001 * 1.0/4.0,
+		["PINT"] = 3.785_411_784 * 0.001 * 1.0/8.0,
+		["CUP"] = 3.785_411_784 * 0.001 * 1.0/16.0,
+		["TONNE"] = 1000 * 1000,
+		["TON"] = 1000 * 1000,
+		["CARAT"] = 0.2,
+		["POUND"] = 0.453_592_37 * 1000,
+		["LB"] = 0.453_592_37 * 1000,
+		["OUNCE"] = 0.453_592_37 * 1000 * 1.0/16.0,
+		["OZ"] = 0.453_592_37 * 1000 * 1.0/16.0,
+		["YARD"] = 0.9144,
+		["YD"] = 0.9144,
+		["MILE"] = 0.9144 * 1760,
+		["MI"] = 0.9144 * 1760,
+		["FEET"] = 0.9144 / 3,
+		["FT"] = 0.9144 / 3,
+		["INCH"] = 0.9144 / 36,
+		["IN"] = 0.9144 / 36,
+
+		#endregion
+
 		["ANS"] = 0,
 
 		["ඞ"] = 1337,
 	};
+
+	private void AddMetricUnit(string s, string symbol = null, double val = 1)
+	{
+		s = s.ToUpper();
+		if (!string.IsNullOrWhiteSpace(symbol)) symbol = symbol.ToUpper();
+
+		AddUnit("YOTTA", s, 1e24 * val);
+		AddUnit("ZETTA", s, 1e21 * val);
+		AddUnit("EXA", s, 1e18 * val);
+		AddUnit("PETA", s, 1e15 * val);
+		AddUnit("TERA", s, 1e12 * val);
+		AddUnit("GIGA", s, 1e9 * val);
+		AddUnit("MEGA", s, 1e6 * val);
+		AddUnit("KILO", s, 1e3 * val);
+		AddUnit("HECTO", s, 1e2 * val);
+		AddUnit("DECA", s, 1e1 * val);
+
+		AddUnit(string.Empty, s, val);
+
+		AddUnit("DECI", s, 1e-1 * val);
+		AddUnit("CENTI", s, 1e-2 * val);
+		AddUnit("MILLI", s, 1e-3 * val);
+		AddUnit("MICRO", s, 1e-6 * val);
+		AddUnit("NANO", s, 1e-9 * val);
+		AddUnit("PICO", s, 1e-12 * val);
+		AddUnit("FEMTO", s, 1e-15 * val);
+		AddUnit("ATTO", s, 1e-18 * val);
+		AddUnit("ZEPTO", s, 1e-21 * val);
+		AddUnit("YOCTO", s, 1e-24 * val);
+
+		if (!string.IsNullOrWhiteSpace(symbol))
+		{
+			AddUnit("K", symbol, 1e3 * val, false);
+			AddUnit("H", symbol, 1e2 * val, false);
+			AddUnit("DA", symbol, 1e1 * val, false);
+			AddUnit(string.Empty, symbol, val, false);
+			AddUnit("D", symbol, 1e-1 * val, false);
+			AddUnit("C", symbol, 1e-2 * val, false);
+			AddUnit("M", symbol, 1e-3 * val, false);
+			AddUnit("MC", symbol, 1e-6 * val, false);
+			AddUnit("N", symbol, 1e-9 * val, false);
+			AddUnit("P", symbol, 1e-12 * val, false);
+			AddUnit("F", symbol, 1e-15 * val, false);
+			AddUnit("A", symbol, 1e-18 * val, false);
+			AddUnit("Z", symbol, 1e-21 * val, false);
+			AddUnit("Y", symbol, 1e-24 * val, false);
+		}
+	}
+
+	private void AddUnit(string prefix, string s, double val, bool plural = true)
+	{
+		_variables.Add($"{prefix}{s}", val);
+		if (plural && !string.IsNullOrWhiteSpace(s)) _variables.Add($"{prefix}{s}S", val);
+	}
 
 	private readonly Dictionary<string, Macro> _macros = new(StringComparer.OrdinalIgnoreCase);
 	private readonly Stack<List<(string, NameType)>> _localNameStack = new();
@@ -89,6 +266,46 @@ public class Solver
 	public Func<string> ReadLine { get; set; } = Console.ReadLine;
 	public Action Flush { get; set; } = Console.Clear;
 	public Action Clear { get; set; } = Console.Clear;
+
+	public Solver()
+	{
+		#region MetricUnits
+		AddMetricUnit("second", "s");
+		AddMetricUnit("metre", "m");
+		AddMetricUnit("meter");
+		AddMetricUnit("gram", "g");
+		AddMetricUnit("ampere", "a");
+		AddMetricUnit("amp");
+		AddMetricUnit("kelvin", "k");
+		AddMetricUnit("mole", "mol");
+		AddMetricUnit("candela", "cd");
+		AddMetricUnit("", null);
+		#endregion
+
+		#region DerivedUnits
+		AddMetricUnit("hertz", "hz");
+		AddMetricUnit("newton", "n", 1000);
+		AddMetricUnit("pascal", val: 1000);
+		AddMetricUnit("joule", "j", 1000);
+		AddMetricUnit("watt", "w", 1000);
+		AddMetricUnit("coulomb");
+		AddMetricUnit("volt", "v", 1000);
+		AddMetricUnit("farad", "f");
+		AddMetricUnit("ohm", val: 1000);
+		AddMetricUnit("siemens", val: 1000);
+		AddMetricUnit("weber", "wb", 1000);
+		AddMetricUnit("tesla", val: 1000);
+		AddMetricUnit("henry", val: 1000);
+		AddMetricUnit("lumen", "lm");
+		AddMetricUnit("lux", "lx");
+		AddMetricUnit("becquerel", "bq");
+		AddMetricUnit("gray", "gy");
+		AddMetricUnit("sievert", "sv");
+		AddMetricUnit("katal", "kat");
+		#endregion
+
+
+	}
 
 	public double Solve(string s, bool setAns = true) => Solve(s, out _, setAns);
 
