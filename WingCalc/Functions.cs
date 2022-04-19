@@ -388,13 +388,31 @@ internal static class Functions
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"iter\" requires a pointer node as its first argument.", scope);
 			ICallable lambda = args[1] as ICallable ?? throw new WingCalcException("Function \"iter\" requires a callable node as its second argument.", scope);
 
+			int count = 0;
+
 			foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
 			{
+				count++;
 				lambda.Call(scope, new(new List<INode>() { new ConstantNode(x), new ConstantNode(i) }));
 			}
 
-			return ListHandler.Enumerate(pointer, scope).Count();
+			return count;
 		}, "Enumerates through the list at the pointer represented by its first argument, calling the lambda represented by its second argument on each element. The lambda is called with its first argument being the element found, and its second argument being the index of that element. Finally, $name returns the number of elements contained within the list."),
+		new("mut", (args, scope) =>
+		{
+			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"iter\" requires a pointer node as its first argument.", scope);
+			ICallable lambda = args[1] as ICallable ?? throw new WingCalcException("Function \"iter\" requires a callable node as its second argument.", scope);
+
+			int count = 0;
+
+			foreach (var (x, i) in ListHandler.Enumerate(pointer, scope).Select((x, i) => (x, i)))
+			{
+				count++;
+				ListHandler.Set(pointer, i, lambda.Call(scope, new(new List<INode>() { new ConstantNode(x), new ConstantNode(i) })), scope);
+			}
+
+			return count;
+		}, ""),
 		new("filter", (args, scope) =>
 		{
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"filter\" requires a pointer node as its first argument.", scope);
