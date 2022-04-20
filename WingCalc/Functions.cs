@@ -199,6 +199,49 @@ internal static class Functions
 		new("clamp", (args, scope) => Math.Clamp(args[0].Solve(scope), args[1].Solve(scope), args[2].Solve(scope)), "Returns its first argument if it is between its second and third arguments. Otherwise, if its first argument is less than its second, clamp returns its second argument. Finally, if its first argument is greater than its third, clamp returns its second argument."),
 		new("sign", (args, scope) => Math.Sign(args[0].Solve(scope)), "Given its first argument, returns +1 if it is positive, 0 if it is 0, or -1 if it is negative."),
 		new("cpsign", (args, scope) => Math.CopySign(args[0].Solve(scope), args[1].Solve(scope)), "Returns a value with the magnitude of its first argument and the sign of its second argument."),
+		new("english", (args, scope) =>
+		{
+			BigInteger integer;
+			BigInteger fraction;
+			int fractionExponent;
+			int integerExponent;
+
+			if (args[0] is IPointer pointer)
+			{
+
+			}
+			else
+			{
+				if (args[0] is QuoteNode qn)
+				{
+					int decimalIndex = qn.Text.IndexOf('.');
+					if (decimalIndex == -1) decimalIndex = qn.Text.Length;
+
+					integer = BigInteger.Parse(qn.Text[..decimalIndex]);
+					integerExponent = decimalIndex;
+					fraction = decimalIndex == qn.Text.Length
+						? 0
+						: BigInteger.Parse(qn.Text[(decimalIndex + 1)..]);
+					fractionExponent = qn.Text.Length - decimalIndex - 1;
+				}
+				else
+				{
+					double x = args[0].Solve(scope);
+					integer = (BigInteger)Math.Truncate(x);
+					integerExponent = (int)Math.Floor(Math.Log10((double)integer));
+					if (Math.Log10((double)integer) == Math.Truncate(Math.Log10((double)integer))) integerExponent++;
+					fractionExponent = x.ToString().Length - Math.Truncate(x).ToString().Length - 1;
+					fraction = (int)(x - Math.Truncate(x));
+				}
+
+				for (int i = integerExponent / 3; i >= 0; i++)
+				{
+
+				}
+			}
+
+			return 0;
+		}, ""),
 		#endregion
 
 		#region Bits
@@ -412,7 +455,7 @@ internal static class Functions
 			}
 
 			return count;
-		}, ""),
+		}, "Enumerates through the list at the pointer represented by its first argument, setting each value to the result of calling the lambda represented by its second argument on that element. The lambda is called with its first argument being the element found, and its second argument being the index of that element. Finally, $name returns the number of elements contained within the list."),
 		new("filter", (args, scope) =>
 		{
 			IPointer pointer = args[0] as IPointer ?? throw new WingCalcException("Function \"filter\" requires a pointer node as its first argument.", scope);
