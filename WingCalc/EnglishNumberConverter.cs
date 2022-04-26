@@ -99,16 +99,20 @@ internal static class EnglishNumberConverter
 			return _constants[x];
 		}
 
-		return English(integer, fraction, integerExponent, fractionExponent);
+		return English(integer, fraction, integerExponent, fractionExponent, x < 0);
 	}
 
-	public static string English(BigInteger integer, BigInteger fraction, int integerExponent, int fractionExponent)
+	public static string English(BigInteger integer, BigInteger fraction, int integerExponent, int fractionExponent, bool negative)
 	{
 		StringBuilder sb = new();
 
-		if (integer == 0) return "zero";
+		if (integer == 0 && fraction == 0) return "zero";
 
-		if (integer < 0) sb.Append("negative ");
+		if (negative)
+		{
+			sb.Append("negative ");
+			integer *= -1;
+		}
 
 		for (int i = integerExponent / 3; i >= 0; i--)
 		{
@@ -169,7 +173,9 @@ internal static class EnglishNumberConverter
 			fraction /= gcd;
 			denominator /= gcd;
 
-			sb.Append($"and {English(fraction, 0, (int)Math.Floor(BigInteger.Log10(fraction)), 0)} over {English(denominator, 0, (int)Math.Floor(BigInteger.Log10(denominator)), 0)}");
+			if (integer != 0) sb.Append("and ");
+
+			sb.Append($"{English(fraction, 0, (int)Math.Floor(BigInteger.Log10(fraction)), 0, false)} over {English(denominator, 0, (int)Math.Floor(BigInteger.Log10(denominator)), 0, false)}");
 		}
 
 		return sb.ToString().Trim();

@@ -214,26 +214,34 @@ internal static class Functions
 			{
 				if (args[0] is QuoteNode qn)
 				{
+					bool negative = false;
 					int decimalIndex = qn.Text.IndexOf('.');
 					if (decimalIndex == -1) decimalIndex = qn.Text.Length;
 
-					integer = BigInteger.Parse(qn.Text[..decimalIndex]);
+					if (qn.Text[0] == '.' || qn.Text[0..2] == "-.") integer = 0;
+					else integer = BigInteger.Parse(qn.Text[..decimalIndex]);
 					integerExponent = decimalIndex;
 					fraction = decimalIndex == qn.Text.Length
 						? 0
 						: BigInteger.Parse(qn.Text[(decimalIndex + 1)..]);
 					fractionExponent = qn.Text.Length - decimalIndex - 1;
 
-					Console.WriteLine(EnglishNumberConverter.English(integer, fraction, integerExponent, fractionExponent));
+					if (qn.Text[0] == '-')
+					{
+						integerExponent--;
+						negative = true;
+					}
+
+					Console.WriteLine(EnglishNumberConverter.English(integer, fraction, integerExponent, fractionExponent, negative));
 				}
 				else
 				{
 					double x = args[0].Solve(scope);
 					integer = (BigInteger)Math.Truncate(x);
-					integerExponent = (int)Math.Floor(BigInteger.Log10(integer));
-					if (BigInteger.Log10(integer) == Math.Truncate(BigInteger.Log10(integer))) integerExponent++;
+					integerExponent = (int)Math.Floor(BigInteger.Log10(integer < 0 ? -integer : integer));
+					if (BigInteger.Log10(integer < 0 ? -integer : integer) == Math.Truncate(BigInteger.Log10(integer < 0 ? -integer : integer))) integerExponent++;
 
-					double y = x;
+					double y = Math.Abs(x);
 					while (y % 1 != 0)
 					{
 						fractionExponent++;
