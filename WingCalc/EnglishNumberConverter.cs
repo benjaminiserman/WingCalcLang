@@ -16,44 +16,6 @@ internal static class EnglishNumberConverter
 		[double.NaN] = "not a number",
 	};
 
-	private static readonly string[] _shortScales = new string[]
-	{
-		"",
-		"thousand",
-		"million",
-		"billion",
-		"trillion",
-		"quadrillion",
-		"quintillion",
-		"sextillion",
-		"septillion",
-		"octillion",
-		"nonillion",
-		"decillion",
-		"undecillion",
-		"duodecillion",
-		"tredecillion",
-		"quattuordecillion",
-		"quindecillion",
-		"sexdecillion",
-		"septemdecillion",
-		"octodecillion",
-		"novemdecillion",
-		"vigintillion",
-		"unvigintillion",
-		"duovigintillion",
-		"trevigintillion",
-		"quattuorvigintillion",
-		"quinvigintillion",
-		"sexvigintillion",
-		"septvigintillion",
-		"octovigintillion",
-		"nonvigintillion",
-		"trigintillion",
-		"untrigintillion",
-		"duotrigintillion",
-	};
-
 	private static readonly string[] _definedWords = new string[]
 	{
 		"zero",
@@ -151,16 +113,9 @@ internal static class EnglishNumberConverter
 					}
 				}
 
-				try
+				if (i != 0)
 				{
-					if (i != 0)
-					{
-						sb.Append($"{_shortScales[i]} ");
-					}
-				}
-				catch
-				{
-					throw new Exceptions.WingCalcException($"Larger numbers have not yet been implemented. Tell me to do it by commenting on https://github.com/winggar/WingCalcLang/issues/49!");
+					sb.Append($"{ConwayGuySystem.GetShortScale(i)} ");
 				}
 			}
 		}

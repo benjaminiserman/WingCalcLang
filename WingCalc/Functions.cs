@@ -238,8 +238,7 @@ internal static class Functions
 				{
 					double x = args[0].Solve(scope);
 					integer = (BigInteger)Math.Truncate(x);
-					integerExponent = (int)Math.Floor(BigInteger.Log10(integer < 0 ? -integer : integer));
-					if (BigInteger.Log10(integer < 0 ? -integer : integer) == Math.Truncate(BigInteger.Log10(integer < 0 ? -integer : integer))) integerExponent++;
+					integerExponent = (int)Math.Floor(BigInteger.Log10(integer < 0 ? -integer : integer)) + 1;
 
 					double y = Math.Abs(x);
 					while (y % 1 != 0)
@@ -254,6 +253,11 @@ internal static class Functions
 				}
 			}
 
+			return 0;
+		}, ""),
+		new("s", (args, scope) =>
+		{
+			Console.WriteLine(ConwayGuySystem.GetShortScale((BigInteger)(args[0].Solve(scope) / 3)));
 			return 0;
 		}, ""),
 		#endregion
