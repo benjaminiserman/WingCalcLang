@@ -202,11 +202,11 @@ internal static class Functions
 		new("english", (args, scope) =>
 		{
 			BigInteger integer;
-			BigInteger fraction;
-			int fractionExponent;
+			BigInteger fraction = 0;
+			int fractionExponent = 0;
 			int integerExponent;
 
-			if (args[0] is IPointer pointer)
+			if (args[0] is IPointer pointer && args.Count > 1)
 			{
 
 			}
@@ -223,20 +223,26 @@ internal static class Functions
 						? 0
 						: BigInteger.Parse(qn.Text[(decimalIndex + 1)..]);
 					fractionExponent = qn.Text.Length - decimalIndex - 1;
+
+					Console.WriteLine(EnglishNumberConverter.English(integer, fraction, integerExponent, fractionExponent));
 				}
 				else
 				{
 					double x = args[0].Solve(scope);
 					integer = (BigInteger)Math.Truncate(x);
-					integerExponent = (int)Math.Floor(Math.Log10((double)integer));
-					if (Math.Log10((double)integer) == Math.Truncate(Math.Log10((double)integer))) integerExponent++;
-					fractionExponent = x.ToString().Length - Math.Truncate(x).ToString().Length - 1;
-					fraction = (int)(x - Math.Truncate(x));
-				}
+					integerExponent = (int)Math.Floor(BigInteger.Log10(integer));
+					if (BigInteger.Log10(integer) == Math.Truncate(BigInteger.Log10(integer))) integerExponent++;
 
-				for (int i = integerExponent / 3; i >= 0; i++)
-				{
+					double y = x;
+					while (y % 1 != 0)
+					{
+						fractionExponent++;
+						fraction *= 10;
+						fraction += (int)(Math.Truncate(y * 10) % 10);
+						y *= 10;
+					}
 
+					Console.WriteLine(EnglishNumberConverter.English(x, integer, fraction, integerExponent, fractionExponent));
 				}
 			}
 
