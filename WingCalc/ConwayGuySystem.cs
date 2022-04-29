@@ -108,7 +108,7 @@ internal class ConwayGuySystem
 				{
 					if (h == 0)
 					{
-						if (_tens[t + 1][^1] == 'a')
+						if (_tens[t][^1] == 'a')
 						{
 							sb.Append($"{_tens[t][..^1]}i");
 						}
