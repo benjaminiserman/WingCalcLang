@@ -1,10 +1,8 @@
 ﻿namespace WingCalc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 
 internal class ConwayGuySystem
 {
@@ -21,29 +19,6 @@ internal class ConwayGuySystem
 		"septill",
 		"octill",
 		"nonill",
-		/*"decillion",
-		"undecillion",
-		"duodecillion",
-		"tredecillion",
-		"quattuordecillion",
-		"quindecillion",
-		"sexdecillion",
-		"septemdecillion",
-		"octodecillion",
-		"novemdecillion",
-		"vigintillion",
-		"unvigintillion",
-		"duovigintillion",
-		"trevigintillion",
-		"quattuorvigintillion",
-		"quinvigintillion",
-		"sexvigintillion",
-		"septvigintillion",
-		"octovigintillion",
-		"nonvigintillion",
-		"trigintillion",
-		"untrigintillion",
-		"duotrigintillion",*/
 	};
 
 	private static readonly string[] _units = new string[]
@@ -101,7 +76,7 @@ internal class ConwayGuySystem
 				if (u != 0)
 				{
 					sb.Append(_units[u]);
-					Morph(u, t, h, sb);
+					Morph(u, t, sb);
 				}
 
 				if (t != 0)
@@ -137,20 +112,20 @@ internal class ConwayGuySystem
 		return sb.ToString();
 	}
 
-	private static void Morph(int u, int t, int h, StringBuilder sb)
+	private static void Morph(int u, int t, StringBuilder sb)
 	{
 		if (t != 0)
 		{
-			if (u == 3 && (_tenS.Contains(t) || _tenX.Contains(t)))
+			if (u is 3 && (_tenS.Contains(t) || _tenX.Contains(t)))
 			{
 				sb.Append('s');
 			}
-			else if (u == 6)
+			else if (u is 6)
 			{
 				if (_tenS.Contains(t)) sb.Append('s');
 				else if (_tenX.Contains(t)) sb.Append('x');
 			}
-			else if (u == 7 || u == 9)
+			else if (u is 7 or 9)
 			{
 				if (_tenN.Contains(t)) sb.Append('n');
 				else if (_tenM.Contains(t)) sb.Append('m');
@@ -158,6 +133,3 @@ internal class ConwayGuySystem
 		}
 	}
 }
-// 36
-// 12
-// 11

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Text;
 using WingCalc.Exceptions;
 using WingCalc.Nodes;
 
