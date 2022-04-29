@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Reflection;
 using WingCalc.Exceptions;
 using WingCalc.Nodes;
+using static System.Net.Mime.MediaTypeNames;
 
 internal static class Functions
 {
@@ -205,60 +206,56 @@ internal static class Functions
 			int fractionExponent = 0;
 			int integerExponent;
 
-			if (args[0] is IPointer pointer && args.Count > 1)
-			{
+			int offset = args[0] is IPointer pointer && args.Count > 1 ? 1 : 0;
 
+			if (args[offset] is QuoteNode qn)
+			{
+				bool negative = false;
+				int decimalIndex = qn.Text.IndexOf('.');
+				if (decimalIndex == -1) decimalIndex = qn.Text.Length;
+
+				if (qn.Text[0] == '.' || qn.Text[0..2] == "-.") integer = 0;
+				else integer = BigInteger.Parse(qn.Text[..decimalIndex]);
+				integerExponent = decimalIndex;
+				fraction = decimalIndex == qn.Text.Length
+					? 0
+					: BigInteger.Parse(qn.Text[(decimalIndex + 1)..]);
+				fractionExponent = qn.Text.Length - decimalIndex - 1;
+
+				if (qn.Text[0] == '-')
+				{
+					integerExponent--;
+					negative = true;
+				}
+
+				string text = EnglishNumberConverter.English(integer, fraction, integerExponent, fractionExponent, negative);
+
+				if (offset == 0) scope.Solver.WriteLine(text);
+				else ListHandler.Allocate(args[0] as IPointer, text.Select(x => (double)x).ToList(), scope);
 			}
 			else
 			{
-				if (args[0] is QuoteNode qn)
+				double x = args[offset].Solve(scope);
+				integer = (BigInteger)Math.Truncate(x);
+				integerExponent = (int)Math.Floor(BigInteger.Log10(integer < 0 ? -integer : integer)) + 1;
+
+				double y = Math.Abs(x);
+				while (y % 1 != 0)
 				{
-					bool negative = false;
-					int decimalIndex = qn.Text.IndexOf('.');
-					if (decimalIndex == -1) decimalIndex = qn.Text.Length;
-
-					if (qn.Text[0] == '.' || qn.Text[0..2] == "-.") integer = 0;
-					else integer = BigInteger.Parse(qn.Text[..decimalIndex]);
-					integerExponent = decimalIndex;
-					fraction = decimalIndex == qn.Text.Length
-						? 0
-						: BigInteger.Parse(qn.Text[(decimalIndex + 1)..]);
-					fractionExponent = qn.Text.Length - decimalIndex - 1;
-
-					if (qn.Text[0] == '-')
-					{
-						integerExponent--;
-						negative = true;
-					}
-
-					Console.WriteLine(EnglishNumberConverter.English(integer, fraction, integerExponent, fractionExponent, negative));
+					fractionExponent++;
+					fraction *= 10;
+					fraction += (int)(Math.Truncate(y * 10) % 10);
+					y *= 10;
 				}
-				else
-				{
-					double x = args[0].Solve(scope);
-					integer = (BigInteger)Math.Truncate(x);
-					integerExponent = (int)Math.Floor(BigInteger.Log10(integer < 0 ? -integer : integer)) + 1;
 
-					double y = Math.Abs(x);
-					while (y % 1 != 0)
-					{
-						fractionExponent++;
-						fraction *= 10;
-						fraction += (int)(Math.Truncate(y * 10) % 10);
-						y *= 10;
-					}
+				string text = EnglishNumberConverter.English(x, integer, fraction, integerExponent, fractionExponent);
 
-					Console.WriteLine(EnglishNumberConverter.English(x, integer, fraction, integerExponent, fractionExponent));
-				}
+				if (offset == 0) scope.Solver.WriteLine(text);
+				else ListHandler.Allocate(args[0] as IPointer, text.Select(x => (double)x).ToList(), scope);
 			}
 
 			return 0;
-		}, ""),
-		new("s", (args, scope) =>
-		{
-			Console.WriteLine(ConwayGuySystem.GetShortScale((BigInteger)(args[0].Solve(scope) / 3)));
-			return 0;
-		}, ""),
+		}, "Given a pointer and a quote or any expression, $name will store the english short-scale word for the number stored in the quote or the result of the expression into the memory at the pointer. Given just a quote or expression, $name will print the english short-scale word for the number stored in the quote or the result of the expression into standard out. Finally, $name returns 0."),
 		#endregion
 
 		#region Bits
