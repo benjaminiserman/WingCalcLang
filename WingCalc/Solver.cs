@@ -198,6 +198,21 @@ public class Solver
 
 		#endregion
 
+		#region NUMBERS
+
+		["THOUSAND"] = 1e3,
+		["MILLION"] = 1e6,
+		["BILLION"] = 1e9,
+		["TRILLION"] = 1e12,
+		["QUADRILLION"] = 1e15,
+		["QUINTILLION"] = 1e18,
+		["SEXTILLION"] = 1e21,
+		["OCTILLION"] = 1e24,
+		["NONILLION"] = 1e27,
+		["DECILLION"] = 1e30,
+
+		#endregion
+
 		["ANS"] = 0,
 
 		["ඞ"] = 1337,
