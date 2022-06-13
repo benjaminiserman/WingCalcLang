@@ -379,7 +379,7 @@ public class Solver
 					availableNodes.Add(new PreOperatorNode(tokens[i].Text));
 					isCoefficient = false;
 
-					if (Operators.IsBinary(tokens[i].Text) && Operators.GetPrecedence(tokens[i].Text) == Operators.GetPrecedence("=") && availableNodes[^2] is MacroNode mn) // macro assignment
+					if (Operators.IsBinary(tokens[i].Text) && Operators.GetPrecedence(tokens[i].Text) == Operators.GetPrecedence("=") && availableNodes.Count >= 2 && availableNodes[^2] is MacroNode mn) // macro assignment
 					{
 						_localNameStack.Push(new());
 						int end = GetEnd(tokens, i + 1);
