@@ -216,6 +216,8 @@ public class Solver
 		["ANS"] = 0,
 
 		["ඞ"] = 1337,
+
+		["K"] = 1000,
 	};
 
 	private void AddMetricUnit(string s, string symbol = null, double val = 1)
@@ -291,7 +293,7 @@ public class Solver
 		AddMetricUnit("gram", "g");
 		AddMetricUnit("ampere", "a");
 		AddMetricUnit("amp");
-		AddMetricUnit("kelvin", "k");
+		//AddMetricUnit("kelvin", "k");
 		AddMetricUnit("mole", "mol");
 		AddMetricUnit("candela", "cd");
 		AddMetricUnit("", null);
