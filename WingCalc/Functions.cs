@@ -1150,6 +1150,30 @@ internal static class Functions
 		new("ktof", (args, scope) => (args[0].Solve(scope) - 273.15) * 9.0/5.0 + 32, "Takes a temperature in kelvin and returns it converted to fahrenheit."),
 		#endregion
 
+		#region FunStrings
+
+		new("smallcaps", FunStringsHelper.GetFunction(FunStringsHelper.GetSmallCap), ""),
+		new("bubbletext", FunStringsHelper.GetFunction(FunStringsHelper.Bubble), ""),
+		new("blackbubbletext", FunStringsHelper.GetFunction(FunStringsHelper.BlackBubble), ""),
+		new("squaretext", FunStringsHelper.GetFunction(FunStringsHelper.Square), ""),
+		new("cursive", FunStringsHelper.GetFunction(FunStringsHelper.Cursive), ""),
+		new("outline", FunStringsHelper.GetFunction(FunStringsHelper.Outline), ""),
+		new("fraktur", FunStringsHelper.GetFunction(FunStringsHelper.Fraktur), ""),
+		new("monospace", FunStringsHelper.GetFunction(FunStringsHelper.Monospace), ""),
+
+		new("symbol", (args, scope) =>
+		{
+			var s = ListHandler.PointerOrString(args[0], scope);
+
+			var output = FunStringsHelper.NameToSymbol(s);
+
+			scope.Solve.WriteLine(output);
+
+			return 1;
+		}, "")
+
+		#endregion
+
 	}.ToDictionary(x => x.Name, x => x);
 
 	internal static Function Get(string s) => _functions[s].Function;
