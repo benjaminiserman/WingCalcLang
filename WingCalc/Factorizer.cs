@@ -28,7 +28,7 @@ internal static class Factorizer
 			x /= 2;
 		}
 
-		for (int i = 3; i < max; i += 2)
+		for (int i = 3; i <= max; i += 2)
 		{
 			while (x % i == 0)
 			{
