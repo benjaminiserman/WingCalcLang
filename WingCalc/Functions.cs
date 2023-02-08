@@ -1167,7 +1167,7 @@ internal static class Functions
 
 			var output = FunStringsHelper.NameToSymbol(s);
 
-			scope.Solve.WriteLine(output);
+			scope.Solver.WriteLine(output.ToString());
 
 			return 1;
 		}, "")

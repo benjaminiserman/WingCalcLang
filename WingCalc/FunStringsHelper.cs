@@ -187,19 +187,19 @@ public static class FunStringsHelper
 
 			_ => '?'
 		};
+	}
 
-		public static Func<List<INode>, Scope, double> GetFunction(Func<char, char> transform)
+	internal static Functions.Function GetFunction(Func<char, char> transform)
+	{
+		return (args, scope) =>
 		{
-			return (args, scope) =>
-			{
-				var s = ListHandler.PointerOrString(args[0], scope);
+			var s = ListHandler.PointerOrString(args[0], scope);
 
-				var output = string.Join(string.Empty, s.Select(c => transform(c)));
+			var output = string.Join(string.Empty, s.Select(c => transform(c)));
 
-				scope.Solve.WriteLine(output);
+			scope.Solver.WriteLine(output);
 
-				return 1;
-			}
-		}
+			return 1;
+		};
 	}
 }
