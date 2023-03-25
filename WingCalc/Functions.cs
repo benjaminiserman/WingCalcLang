@@ -261,6 +261,9 @@ internal static class Functions
 		#region Bits
 		new("bitinc", (args, scope) => Math.BitIncrement(args[0].Solve(scope)), "Returns its first argument incremented by the smallest computationally-possible amount."),
 		new("bitdec", (args, scope) => Math.BitDecrement(args[0].Solve(scope)), "Returns its first argument decremented by the smallest computationally-possible amount."),
+		new("dtobytes", BytesHelper.GetBytesFromDouble(), "If its first argument is a pointer node, allocates an array at that pointer representing the byte[] representation of the second argument as a double. Otherwise, prints its first argument converted from a double to its byte[] representation."),
+		new("ftobytes", BytesHelper.GetBytesFromFloat(), "If its first argument is a pointer node, allocates an array at that pointer representing the byte[] representation of the second argument as a float. Otherwise, prints its first argument converted from a float to its byte[] representation."),
+		new("itobytes", BytesHelper.GetBytesFromInt(), "If its first argument is a pointer node, allocates an array at that pointer representing the byte[] representation of the second argument as a int. Otherwise, prints its first argument converted from a int to its byte[] representation."),
 		#endregion
 
 		#region ListProperties
